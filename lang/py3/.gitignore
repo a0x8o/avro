@@ -1,0 +1,6 @@
+.eggs/
+avro/HandshakeRequest.avsc
+avro/HandshakeResponse.avsc
+avro/VERSION.txt
+avro/tests/interop.avsc
+dist/

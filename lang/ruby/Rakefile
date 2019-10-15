@@ -1,0 +1,60 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+require 'rubygems'
+require 'echoe'
+VERSION = File.open('../../share/VERSION.txt').read.sub('-SNAPSHOT', '.pre1').chomp
+Echoe.new('avro', VERSION) do |p|
+  p.author = "Apache Software Foundation"
+  p.email = "dev@avro.apache.org"
+  p.summary = "Apache Avro for Ruby"
+  p.description = "Avro is a data serialization and RPC format"
+  p.url = "https://avro.apache.org/"
+  p.runtime_dependencies = ["multi_json ~>1"]
+  p.licenses = ["Apache-2.0"]
+end
+
+t = Rake::TestTask.new(:interop)
+t.pattern = 'interop/test*.rb'
+
+task :generate_interop do
+  $:.unshift(HERE + '/lib')
+  $:.unshift(HERE + '/test')
+  require 'avro'
+  require 'random_data'
+
+  schema = Avro::Schema.parse(File.read(SCHEMAS + '/interop.avsc'))
+  r = RandomData.new(schema, ENV['SEED'])
+  Avro::DataFile.codecs.each do |name, codec|
+    next unless codec
+    filename = name == 'null' ? 'ruby.avro' : "ruby_#{name}.avro"
+    path = File.join(BUILD, 'interop/data', filename)
+    Avro::DataFile.open(path, 'w', schema.to_s, name) do |writer|
+      writer << r.next
+    end
+  end
+end
+
+
+HERE = File.expand_path(File.dirname(__FILE__))
+SHARE = HERE + '/../../share'
+SCHEMAS = SHARE + '/test/schemas'
+BUILD = HERE + '/../../build'
+
+task :dist => [:gem] do
+  mkdir_p "../../dist/ruby"
+  cp "pkg/avro-#{VERSION}.gem", "../../dist/ruby"
+end
