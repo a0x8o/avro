@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+##
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -14,6 +17,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import, division, print_function
+
 import inspect
 import os
 import subprocess
@@ -25,8 +30,7 @@ import set_avro_test_path
 
 
 class TestTetherWordCount(unittest.TestCase):
-  """ unittest for a python tethered map-reduce job.
-  """
+  """unittest for a python tethered map-reduce job."""
 
   def _write_lines(self,lines,fname):
     """
@@ -72,7 +76,7 @@ class TestTetherWordCount(unittest.TestCase):
       words=line.split()
 
       for w in words:
-        if not(counts.has_key(w.strip())):
+        if not(w.strip() in counts):
           counts[w.strip()]=0
 
         counts[w.strip()]=counts[w.strip()]+1
@@ -92,12 +96,12 @@ class TestTetherWordCount(unittest.TestCase):
     import avro
 
     import subprocess
-    import StringIO
     import shutil
     import tempfile
     import inspect
 
     proc=None
+    exfile = None
 
     try:
 
@@ -181,11 +185,11 @@ python -m avro.tether.tether_task_runner word_count_task.WordCountTask
       exhf.close()
 
       # make it world executable
-      os.chmod(exfile,0755)
+      os.chmod(exfile,0o755)
 
       args.extend(["--program",exfile])
 
-      print "Command:\n\t{0}".format(" ".join(args))
+      print("Command:\n\t{0}".format(" ".join(args)))
       proc=subprocess.Popen(args)
 
 
@@ -207,7 +211,7 @@ python -m avro.tether.tether_task_runner word_count_task.WordCountTask
         proc.kill()
       if os.path.exists(base_dir):
         shutil.rmtree(base_dir)
-      if os.path.exists(exfile):
+      if exfile is not None and os.path.exists(exfile):
         os.remove(exfile)
 
 if __name__== "__main__":
