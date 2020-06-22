@@ -391,6 +391,7 @@ function BlockEncoder(schema, opts) {
   this._pending = 0;
   this._finished = false;
   this._needPush = false;
+  this._downstream = null;
 
   this.on('finish', function () {
     this._finished = true;
@@ -406,6 +407,10 @@ BlockEncoder.getDefaultCodecs = function () {
     'null': function (buf, cb) { cb(null, buf); },
     'deflate': zlib.deflateRaw
   };
+};
+
+BlockEncoder.prototype.getDownstream = function () {
+  return this._downstream;
 };
 
 BlockEncoder.prototype._write = function (val, encoding, cb) {
@@ -562,7 +567,7 @@ function createFileDecoder(path, opts) {
  */
 function createFileEncoder(path, schema, opts) {
   var encoder = new BlockEncoder(schema, opts);
-  encoder.pipe(fs.createWriteStream(path, {defaultEncoding: 'binary'}));
+  encoder._downstream = encoder.pipe(fs.createWriteStream(path, {defaultEncoding: 'binary'}));
   return encoder;
 }
 

@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -117,7 +118,7 @@ public class SpecificCompiler {
   private String outputCharacterEncoding;
   private boolean enableDecimalLogicalType = false;
   private String suffix = ".java";
-  private List<Object> additionalVelocityTools = new ArrayList<>();
+  private List<Object> additionalVelocityTools = Collections.emptyList();
 
   /*
    * Used in the record.vm template.
@@ -337,17 +338,17 @@ public class SpecificCompiler {
 
     // These properties tell Velocity to use its own classpath-based
     // loader, then drop down to check the root and the current folder
-    velocityEngine.addProperty("resource.loader", "class, file");
-    velocityEngine.addProperty("class.resource.loader.class",
+    velocityEngine.addProperty("resource.loaders", "class, file");
+    velocityEngine.addProperty("resource.loader.class.class",
         "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-    velocityEngine.addProperty("file.resource.loader.class",
+    velocityEngine.addProperty("resource.loader.file.class",
         "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
-    velocityEngine.addProperty("file.resource.loader.path", "/, .");
-    velocityEngine.setProperty("runtime.references.strict", true);
+    velocityEngine.addProperty("resource.loader.file.path", "/, .");
+    velocityEngine.setProperty("runtime.strict_mode.enable", true);
 
     // Set whitespace gobbling to Backward Compatible (BC)
     // https://velocity.apache.org/engine/2.0/developer-guide.html#space-gobbling
-    velocityEngine.setProperty("space.gobbling", "bc");
+    velocityEngine.setProperty("parser.space_gobbling", "bc");
   }
 
   private void initializeSpecificData() {
@@ -646,7 +647,9 @@ public class SpecificCompiler {
     switch (s.getType()) {
     case STRING:
       result = Schema.create(Schema.Type.STRING);
-      GenericData.setStringType(result, stringType);
+      if (s.getLogicalType() == null) {
+        GenericData.setStringType(result, stringType);
+      }
       break;
     case RECORD:
       result = Schema.createRecord(s.getFullName(), s.getDoc(), null, s.isError());
@@ -678,6 +681,9 @@ public class SpecificCompiler {
       break;
     }
     result.addAllProps(s);
+    if (s.getLogicalType() != null) {
+      s.getLogicalType().addToSchema(result);
+    }
     seen.put(s, result);
     return result;
   }

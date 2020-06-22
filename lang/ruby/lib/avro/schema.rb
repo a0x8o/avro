@@ -29,6 +29,8 @@ module Avro
     NAMED_TYPES_SYM     = Set.new(NAMED_TYPES.map(&:to_sym))
     VALID_TYPES_SYM     = Set.new(VALID_TYPES.map(&:to_sym))
 
+    NAME_REGEX = /^([A-Za-z_][A-Za-z0-9_]*)(\.([A-Za-z_][A-Za-z0-9_]*))*$/
+
     INT_MIN_VALUE = -(1 << 31)
     INT_MAX_VALUE = (1 << 31) - 1
     LONG_MIN_VALUE = -(1 << 63)
@@ -53,10 +55,19 @@ module Avro
 
         type_sym = type.to_sym
         if PRIMITIVE_TYPES_SYM.include?(type_sym)
-          return PrimitiveSchema.new(type_sym, logical_type)
-
+          case type_sym
+          when :bytes
+            precision = json_obj['precision']
+            scale = json_obj['scale']
+            return BytesSchema.new(type_sym, logical_type, precision, scale)
+          else
+            return PrimitiveSchema.new(type_sym, logical_type)
+          end
         elsif NAMED_TYPES_SYM.include? type_sym
           name = json_obj['name']
+          if !Avro.disable_schema_name_validation && name !~ NAME_REGEX
+            raise SchemaParseError, "Name #{name} is invalid for type #{type}!"
+          end
           namespace = json_obj.include?('namespace') ? json_obj['namespace'] : default_namespace
           case type_sym
           when :fixed
@@ -129,6 +140,49 @@ module Avro
     def sha256_fingerprint
       parsing_form = SchemaNormalization.to_parsing_form(self)
       Digest::SHA256.hexdigest(parsing_form).to_i(16)
+    end
+
+    CRC_EMPTY = 0xc15d213aa4d7a795
+
+    # The java library caches this value after initialized, so this pattern
+    # mimics that.
+    @@fp_table = nil
+    def initFPTable
+      @@fp_table = Array.new(256)
+      256.times do |i|
+        fp = i
+        8.times do
+          fp = (fp >> 1) ^ ( CRC_EMPTY & -( fp & 1 ) )
+        end
+        @@fp_table[i] = fp
+      end
+    end
+
+    def crc_64_avro_fingerprint
+      parsing_form = Avro::SchemaNormalization.to_parsing_form(self)
+      data_bytes = parsing_form.unpack("C*")
+
+      initFPTable unless @@fp_table
+
+      fp = CRC_EMPTY
+      data_bytes.each do |b|
+        fp = (fp >> 8) ^ @@fp_table[ (fp ^ b) & 0xff ]
+      end
+      fp
+    end
+
+    SINGLE_OBJECT_MAGIC_NUMBER = [0xC3, 0x01]
+    def single_object_encoding_header
+      [SINGLE_OBJECT_MAGIC_NUMBER, single_object_schema_fingerprint].flatten
+    end
+    def single_object_schema_fingerprint
+      working = crc_64_avro_fingerprint
+      bytes = Array.new(8)
+      8.times do |i|
+        bytes[7 - i] = (working & 0xff)
+        working = working >> 8
+      end
+      bytes
     end
 
     def read?(writers_schema)
@@ -345,6 +399,24 @@ module Avro
       def to_avro(names=nil)
         hsh = super
         hsh.size == 1 ? type : hsh
+      end
+    end
+
+    class BytesSchema < PrimitiveSchema
+      attr_reader :precision, :scale
+      def initialize(type, logical_type=nil, precision=nil, scale=nil)
+        super(type.to_sym, logical_type)
+        @precision = precision
+        @scale = scale
+      end
+
+      def to_avro(names=nil)
+        avro = super
+        return avro if avro.is_a?(String)
+
+        avro['precision'] = precision if precision
+        avro['scale'] = scale if scale
+        avro
       end
     end
 
