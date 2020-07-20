@@ -17,36 +17,36 @@
  */
 package org.apache.avro.specific;
 
+import org.apache.avro.AvroRuntimeException;
+import org.apache.avro.AvroTypeException;
+import org.apache.avro.Protocol;
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Type;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.io.BinaryDecoder;
+import org.apache.avro.io.BinaryEncoder;
+import org.apache.avro.io.DatumReader;
+import org.apache.avro.io.DatumWriter;
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.util.ClassUtils;
+
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.LinkedHashMap;
-import java.nio.ByteBuffer;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.ParameterizedType;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
-import org.apache.avro.Schema;
-import org.apache.avro.Protocol;
-import org.apache.avro.AvroRuntimeException;
-import org.apache.avro.AvroTypeException;
-import org.apache.avro.Schema.Type;
-import org.apache.avro.util.ClassUtils;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.io.DatumReader;
-import org.apache.avro.io.DatumWriter;
-import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.io.BinaryEncoder;
-import org.apache.avro.io.DecoderFactory;
-import org.apache.avro.io.BinaryDecoder;
 
 /** Utilities for generated Java classes and interfaces. */
 public class SpecificData extends GenericData {
@@ -97,14 +97,8 @@ public class SpecificData extends GenericData {
    * e.g., those without a no-arg constructor or those whose fields are all
    * transient.
    */
-  protected Set<Class> stringableClasses = new HashSet<>();
-  {
-    stringableClasses.add(java.math.BigDecimal.class);
-    stringableClasses.add(java.math.BigInteger.class);
-    stringableClasses.add(java.net.URI.class);
-    stringableClasses.add(java.net.URL.class);
-    stringableClasses.add(java.io.File.class);
-  }
+  protected Set<Class> stringableClasses = new HashSet<>(Arrays.asList(java.math.BigDecimal.class,
+      java.math.BigInteger.class, java.net.URI.class, java.net.URL.class, java.io.File.class));
 
   /** For subclasses. Applications normally use {@link SpecificData#get()}. */
   public SpecificData() {
@@ -117,7 +111,7 @@ public class SpecificData extends GenericData {
 
   @Override
   public DatumReader createDatumReader(Schema schema) {
-    return new SpecificDatumReader(schema, schema, this);
+    return createDatumReader(schema, schema);
   }
 
   @Override
@@ -145,7 +139,7 @@ public class SpecificData extends GenericData {
    *         instance.
    */
   public static SpecificData getForSchema(Schema reader) {
-    if (reader.getType() == Type.RECORD) {
+    if (reader != null && reader.getType() == Type.RECORD) {
       final String className = getClassName(reader);
       if (className != null) {
         final Class<?> clazz;
@@ -247,19 +241,26 @@ public class SpecificData extends GenericData {
       String name = schema.getFullName();
       if (name == null)
         return null;
-      Class c = classCache.get(name);
-      if (c == null) {
+      Class<?> c = classCache.computeIfAbsent(name, n -> {
         try {
-          c = ClassUtils.forName(getClassLoader(), getClassName(schema));
+          return ClassUtils.forName(getClassLoader(), getClassName(schema));
         } catch (ClassNotFoundException e) {
-          try { // nested class?
-            c = ClassUtils.forName(getClassLoader(), getNestedClassName(schema));
-          } catch (ClassNotFoundException ex) {
-            c = NO_CLASS;
+          // This might be a nested namespace. Try using the last tokens in the
+          // namespace as an enclosing class by progressively replacing period
+          // delimiters with $
+          StringBuilder nestedName = new StringBuilder(n);
+          int lastDot = n.lastIndexOf('.');
+          while (lastDot != -1) {
+            nestedName.setCharAt(lastDot, '$');
+            try {
+              return ClassUtils.forName(getClassLoader(), nestedName.toString());
+            } catch (ClassNotFoundException ignored) {
+            }
+            lastDot = n.lastIndexOf('.', lastDot - 1);
           }
+          return NO_CLASS;
         }
-        classCache.put(name, c);
-      }
+      });
       return c == NO_CLASS ? null : c;
     case ARRAY:
       return List.class;
@@ -305,8 +306,9 @@ public class SpecificData extends GenericData {
       return Double.class;
     case BOOLEAN:
       return Boolean.class;
+    default:
+      return getClass(schema);
     }
-    return getClass(schema);
   }
 
   /** Returns the Java class name indicated by a schema's name and namespace. */
@@ -319,20 +321,12 @@ public class SpecificData extends GenericData {
     return namespace + dot + name;
   }
 
-  private String getNestedClassName(Schema schema) {
-    String namespace = schema.getNamespace();
-    String name = schema.getName();
-    if (namespace == null || "".equals(namespace))
-      return name;
-    return namespace + "$" + name;
-  }
-
   // cache for schemas created from Class objects. Use ClassValue to avoid
   // locking classloaders and is GC and thread safe.
   private final ClassValue<Schema> schemaClassCache = new ClassValue<Schema>() {
     @Override
     protected Schema computeValue(Class<?> type) {
-      return createSchema(type, new LinkedHashMap<>());
+      return createSchema(type, new HashMap<>());
     }
   };
   // for non-class objects, use a WeakHashMap, but this needs a sync block around
@@ -345,7 +339,7 @@ public class SpecificData extends GenericData {
       if (type instanceof Class) {
         return schemaClassCache.get((Class<?>) type);
       }
-      return schemaTypeCache.computeIfAbsent(type, t -> createSchema(t, new LinkedHashMap<>()));
+      return schemaTypeCache.computeIfAbsent(type, t -> createSchema(t, new HashMap<>()));
     } catch (Exception e) {
       throw (e instanceof AvroRuntimeException) ? (AvroRuntimeException) e : new AvroRuntimeException(e);
     }
@@ -491,10 +485,36 @@ public class SpecificData extends GenericData {
     return (c.isInstance(old) ? old : newInstance(c, schema));
   }
 
+  @SuppressWarnings("rawtypes")
+  @Override
+  /**
+   * Create an InstanceSupplier that caches all information required for the
+   * creation of a schema record instance rather than having to look them up for
+   * each call (as newRecord would)
+   */
+  public InstanceSupplier getNewRecordSupplier(Schema schema) {
+    Class c = getClass(schema);
+    if (c == null) {
+      return super.getNewRecordSupplier(schema);
+    }
+
+    boolean useSchema = SchemaConstructable.class.isAssignableFrom(c);
+    Constructor meth = (Constructor) CTOR_CACHE.get(c);
+    Object[] params = useSchema ? new Object[] { schema } : (Object[]) null;
+
+    return (old, sch) -> {
+      try {
+        return c.isInstance(old) ? old : meth.newInstance(params);
+      } catch (ReflectiveOperationException e) {
+        throw new RuntimeException(e);
+      }
+    };
+  }
+
   /**
    * Tag interface that indicates that a class has a one-argument constructor that
    * accepts a Schema.
-   * 
+   *
    * @see #newInstance
    */
   public interface SchemaConstructable {
@@ -508,6 +528,17 @@ public class SpecificData extends GenericData {
   /** Runtime utility used by generated classes. */
   public static BinaryEncoder getEncoder(ObjectOutput out) {
     return EncoderFactory.get().directBinaryEncoder(new ExternalizableOutput(out), null);
+  }
+
+  @Override
+  public Object createString(Object value) {
+    // Many times the use is String.Priority processing
+    if (value instanceof String) {
+      return value;
+    } else if (isStringable(value.getClass())) {
+      return value;
+    }
+    return super.createString(value);
   }
 
 }

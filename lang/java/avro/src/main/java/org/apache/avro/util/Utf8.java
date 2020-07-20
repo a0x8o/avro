@@ -48,6 +48,8 @@ public class Utf8 implements Comparable<Utf8>, CharSequence {
   }
 
   private byte[] bytes = EMPTY;
+  private int hash = 0;
+  private boolean hasHash = false;
   private int length;
   private String string;
 
@@ -80,7 +82,7 @@ public class Utf8 implements Comparable<Utf8>, CharSequence {
 
   /**
    * Return length in bytes.
-   * 
+   *
    * @deprecated call {@link #getByteLength()} instead.
    */
   @Deprecated
@@ -96,7 +98,7 @@ public class Utf8 implements Comparable<Utf8>, CharSequence {
   /**
    * Set length in bytes. Should called whenever byte content changes, even if the
    * length does not change, as this also clears the cached String.
-   * 
+   *
    * @deprecated call {@link #setByteLength(int)} instead.
    */
   @Deprecated
@@ -117,6 +119,7 @@ public class Utf8 implements Comparable<Utf8>, CharSequence {
     }
     this.length = newLength;
     this.string = null;
+    this.hasHash = false;
     return this;
   }
 
@@ -125,6 +128,19 @@ public class Utf8 implements Comparable<Utf8>, CharSequence {
     this.bytes = getBytesFor(string);
     this.length = bytes.length;
     this.string = string;
+    this.hasHash = false;
+    return this;
+  }
+
+  public Utf8 set(Utf8 other) {
+    if (this.bytes.length < other.length) {
+      this.bytes = new byte[other.length];
+    }
+    this.length = other.length;
+    System.arraycopy(other.bytes, 0, bytes, 0, length);
+    this.string = other.string;
+    this.hash = other.hash;
+    this.hasHash = other.hasHash;
     return this;
   }
 
@@ -156,9 +172,12 @@ public class Utf8 implements Comparable<Utf8>, CharSequence {
 
   @Override
   public int hashCode() {
-    int hash = 0;
-    for (int i = 0; i < this.length; i++)
-      hash = hash * 31 + bytes[i];
+    if (!hasHash) {
+      for (int i = 0; i < length; i++) {
+        hash = hash * 31 + bytes[i];
+      }
+      hasHash = true;
+    }
     return hash;
   }
 
