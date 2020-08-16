@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- mode: python -*-
+# -*- coding: utf-8 -*-
 
 ##
 # Licensed to the Apache Software Foundation (ASF) under one
@@ -110,7 +112,7 @@ class TestDataFile(unittest.TestCase):
                 print('Correct Round Trip: %s' % is_correct)
                 print('')
         os.remove(FILENAME)
-        self.assertEquals(correct, len(CODECS_TO_VALIDATE) * len(SCHEMAS_TO_VALIDATE))
+        self.assertEqual(correct, len(CODECS_TO_VALIDATE) * len(SCHEMAS_TO_VALIDATE))
 
     def test_append(self):
         print('')
@@ -159,7 +161,7 @@ class TestDataFile(unittest.TestCase):
                 print('Correct Appended: %s' % is_correct)
                 print('')
         os.remove(FILENAME)
-        self.assertEquals(correct, len(CODECS_TO_VALIDATE) * len(SCHEMAS_TO_VALIDATE))
+        self.assertEqual(correct, len(CODECS_TO_VALIDATE) * len(SCHEMAS_TO_VALIDATE))
 
     def test_context_manager(self):
         """Test the writer with a 'with' statement."""
@@ -197,8 +199,8 @@ class TestDataFile(unittest.TestCase):
         reader = open(FILENAME, 'rb')
         datum_reader = io.DatumReader()
         with datafile.DataFileReader(reader, datum_reader) as dfr:
-            self.assertEquals(b'foo', dfr.get_meta('test.string'))
-            self.assertEquals(b'1', dfr.get_meta('test.number'))
+            self.assertEqual(b'foo', dfr.get_meta('test.string'))
+            self.assertEqual(b'1', dfr.get_meta('test.number'))
             for datum in dfr:
                 datums.append(datum)
         self.assertTrue(reader.closed)
