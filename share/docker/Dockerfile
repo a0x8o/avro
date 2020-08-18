@@ -64,6 +64,7 @@ RUN apt-get -qqy update \
                                                  source-highlight \
                                                  subversion \
                                                  valgrind \
+                                                 vim \
  && apt-get -qqy clean \
  && rm -rf /var/lib/apt/lists
 
@@ -116,6 +117,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Install Perl modules
 RUN apt-get -qqy update \
  && apt-get -qqy install --no-install-recommends libcompress-raw-zlib-perl \
+                                                 libcpan-uploader-perl \
                                                  libencode-perl \
                                                  libio-string-perl \
                                                  libjson-xs-perl \
@@ -140,7 +142,7 @@ ENV PIP_NO_CACHE_DIR=off
 
 # Install Python3 packages
 RUN python3 -m pip install --upgrade pip setuptools wheel \
- && python3 -m pip install tox zstandard
+ && python3 -m pip install tox-wheel zstandard
 
 # Install .NET SDK
 RUN curl -sSLO https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb \
