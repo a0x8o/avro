@@ -38,7 +38,7 @@
 
     <!-- version properties for dependencies -->
     <hadoop.version>3.3.0</hadoop.version>
-    <jackson.version>2.12.2</jackson.version>
+    <jackson.version>2.12.3</jackson.version>
     <servlet-api.version>4.0.1</servlet-api.version>
     <jetty.version>9.4.39.v20210325</jetty.version>
     <jopt-simple.version>5.0.4</jopt-simple.version>
@@ -58,7 +58,7 @@
     <easymock.version>4.3</easymock.version>
     <hamcrest.version>2.2</hamcrest.version>
     <grpc.version>1.36.1</grpc.version>
-    <zstd-jni.version>1.4.9-4</zstd-jni.version>
+    <zstd-jni.version>1.4.9-5</zstd-jni.version>
     <!-- version properties for plugins -->
     <archetype-plugin.version>3.2.0</archetype-plugin.version>
     <bundle-plugin-version>5.1.2</bundle-plugin-version>
