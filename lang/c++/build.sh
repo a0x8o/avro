@@ -71,7 +71,7 @@ function do_dist() {
   fi
 }
 
-(mkdir -p build; cd build; cmake -G "Unix Makefiles" ..)
+(mkdir -p build; cd build; cmake --version; cmake -G "Unix Makefiles" ..)
 for target in "$@"
 do
 
@@ -79,7 +79,7 @@ case "$target" in
   lint)
     # some versions of cppcheck seem to require an explicit
     # "--error-exitcode" option to return non-zero code
-    cppcheck --error-exitcode=1 --inline-suppr -f -q -x c++ .
+    cppcheck --error-exitcode=1 --inline-suppr -f -q -x c++ api examples impl test
     ;;
 
   test)
