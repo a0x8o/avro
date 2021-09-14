@@ -81,7 +81,6 @@ namespace Avro
                 this.Name = parts[parts.Length - 1];
                 this.EncSpace = encspace;
             }
-            
             fullName = string.IsNullOrEmpty(Namespace) ? this.Name : Namespace + "." + this.Name;
         }
 
