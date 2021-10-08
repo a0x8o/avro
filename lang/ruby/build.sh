@@ -38,12 +38,25 @@ do
       bundle exec rubocop
       ;;
 
+    interop-data-generate)
+      bundle exec rake generate_interop
+      ;;
+
+    interop-data-test)
+      bundle exec rake interop
+      ;;
+
     test)
       bundle exec rake test
       ;;
 
     dist)
-      bundle exec rake dist
+      bundle exec rake build_gemspec
+      gem build
+      DIST="../../dist/ruby"
+      mkdir -p "${DIST}"
+      VERSION=$(cat lib/avro/VERSION.txt)
+      cp "avro-${VERSION}.gem" "${DIST}"
       ;;
 
     clean)
@@ -52,7 +65,7 @@ do
       ;;
 
     *)
-      echo "Usage: $0 {lint|test|dist|clean}"
+      echo "Usage: $0 {clean|dist|interop-data-generate|interop-data-test|lint|test}"
       exit 1
   esac
 done

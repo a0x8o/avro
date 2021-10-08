@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,10 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.avro.util.internal;
 
-@namespace("org.on.the.classpath")
-protocol OnTheClasspath {
-  import idl "folder/relativePath.avdl";
-  record FromAfar {
+import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+public class TestClassValueCache {
+
+  @Test
+  public void testBasic() {
+    ClassValueCache<String> cache = new ClassValueCache<>(Class::toString);
+
+    String fromCache = cache.apply(String.class);
+    assertThat(fromCache, is("class java.lang.String"));
+
+    assertThat(cache.apply(String.class), sameInstance(fromCache));
   }
+
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,10 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.avro.util.internal;
 
-@namespace("org.on.the.classpath")
-protocol OnTheClasspath {
-  import idl "folder/relativePath.avdl";
-  record FromAfar {
+import java.util.function.Function;
+
+/**
+ * The Android environment doesn't support {@link ClassValue}. This utility
+ * bypasses its use in Avro to always recalculate the value without caching.
+ * <p>
+ * This may have a performance impact in Android.
+ *
+ * @param <R> Return type of the ClassValue
+ */
+public class ClassValueCache<R> implements Function<Class<?>, R> {
+
+  private final Function<Class<?>, R> ifAbsent;
+
+  /**
+   * @param ifAbsent The function that calculates the value to be used from the
+   *                 class instance.
+   */
+  public ClassValueCache(Function<Class<?>, R> ifAbsent) {
+    this.ifAbsent = ifAbsent;
+  }
+
+  @Override
+  public R apply(Class<?> c) {
+    return ifAbsent.apply(c);
   }
 }

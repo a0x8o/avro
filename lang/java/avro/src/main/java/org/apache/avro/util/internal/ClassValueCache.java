@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,10 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.avro.util.internal;
 
-@namespace("org.on.the.classpath")
-protocol OnTheClasspath {
-  import idl "folder/relativePath.avdl";
-  record FromAfar {
+import java.util.function.Function;
+
+/**
+ * Wraps a {@link ClassValue} cache so it can be overridden in an android
+ * environment, where it isn't available.
+ *
+ * @param <R> Return type of the ClassValue
+ */
+public class ClassValueCache<R> implements Function<Class<?>, R> {
+
+  private final Function<Class<?>, R> ifAbsent;
+
+  private final ClassValue<R> cache = new ClassValue<R>() {
+    @Override
+    protected R computeValue(Class<?> c) {
+      return ifAbsent.apply(c);
+    }
+  };
+
+  public ClassValueCache(Function<Class<?>, R> ifAbsent) {
+    this.ifAbsent = ifAbsent;
+  }
+
+  @Override
+  public R apply(Class<?> c) {
+    return cache.get(c);
   }
 }

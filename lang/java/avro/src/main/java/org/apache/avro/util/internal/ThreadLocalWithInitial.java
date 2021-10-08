@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,10 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.avro.util.internal;
 
-@namespace("org.on.the.classpath")
-protocol OnTheClasspath {
-  import idl "folder/relativePath.avdl";
-  record FromAfar {
+import java.util.function.Supplier;
+
+/**
+ * Wraps a {@link ThreadLocal#withInitial(Supplier)} so it can be overridden in
+ * an android environment, where this method is not available until API 26.
+ */
+public class ThreadLocalWithInitial {
+
+  /** Delegate a ThreadLocal instance with the supplier. */
+  public static <T> ThreadLocal<T> of(Supplier<? extends T> supplier) {
+    return ThreadLocal.withInitial(supplier);
   }
 }
