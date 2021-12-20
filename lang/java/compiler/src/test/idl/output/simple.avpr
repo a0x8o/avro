@@ -18,17 +18,15 @@
     "type" : "fixed",
     "name" : "MD5",
     "doc" : "An MD5 hash.",
-    "size" : 16
+    "size" : 16,
+    "foo" : "bar"
   }, {
     "type" : "record",
     "name" : "TestRecord",
     "doc" : "A TestRecord.",
     "fields" : [ {
       "name" : "name",
-      "type" : {
-        "type": "string",
-        "avro.java.string": "String"
-      },
+      "type" : "string",
       "default" : "foo",
       "order" : "ignore"
     }, {

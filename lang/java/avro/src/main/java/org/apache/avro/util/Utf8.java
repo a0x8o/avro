@@ -17,10 +17,6 @@
  */
 package org.apache.avro.util;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -33,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * efficient than {@link String} when reading or writing a sequence of values,
  * as a single instance may be reused.
  */
-public class Utf8 implements Comparable<Utf8>, CharSequence, Externalizable {
+public class Utf8 implements Comparable<Utf8>, CharSequence {
   private static final String MAX_LENGTH_PROPERTY = "org.apache.avro.limits.string.maxLength";
   private static final int MAX_LENGTH;
   private static final byte[] EMPTY = new byte[0];
@@ -224,17 +220,5 @@ public class Utf8 implements Comparable<Utf8>, CharSequence, Externalizable {
   /** Gets the UTF-8 bytes for a String */
   public static byte[] getBytesFor(String str) {
     return str.getBytes(StandardCharsets.UTF_8);
-  }
-
-  @Override
-  public void writeExternal(ObjectOutput out) throws IOException {
-    out.writeInt(bytes.length);
-    out.write(bytes);
-  }
-
-  @Override
-  public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-    setByteLength(in.readInt());
-    in.readFully(bytes);
   }
 }

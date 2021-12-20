@@ -1099,8 +1099,6 @@ MessageDecoder.prototype._flush = function () {
     this.emit('error', new Error('trailing data'));
   } else if (this._empty) {
     this.emit('error', new Error('no message decoded'));
-  } else {
-    this.emit('finish');
   }
 };
 

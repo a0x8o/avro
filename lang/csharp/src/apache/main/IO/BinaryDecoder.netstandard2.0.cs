@@ -16,8 +16,6 @@
  * limitations under the License.
  */
 using System;
-using System.IO;
-using System.Text;
 
 namespace Avro.IO
 {
@@ -26,11 +24,6 @@ namespace Avro.IO
     /// </content>
     public partial class BinaryDecoder
     {
-        /// <summary>
-        /// It is hard to find documentation about the real maximum array length in .NET Framework 4.6.1, but this seems to work :-/
-        /// </summary>
-        private const int MaxDotNetArrayLength = 0x3FFFFFFF;
-
         /// <summary>
         /// A float is written as 4 bytes.
         /// The float is converted into a 32-bit integer using a method equivalent to
@@ -79,28 +72,10 @@ namespace Avro.IO
         public string ReadString()
         {
             int length = ReadInt();
-
-            if (length < 0)
-            {
-                throw new AvroException("Can not deserialize a string with negative length!");
-            }
-
-            if (length > MaxDotNetArrayLength)
-            {
-                throw new AvroException("String length is not supported!");
-            }
-
-            using (var binaryReader = new BinaryReader(stream, Encoding.UTF8, true))
-            {
-                var bytes = binaryReader.ReadBytes(length);
-
-                if (bytes.Length != length)
-                {
-                    throw new AvroException("Could not read as many bytes from stream as expected!");
-                }
-
-                return Encoding.UTF8.GetString(bytes);
-            }
+            byte[] buffer = new byte[length];
+            //TODO: Fix this because it's lame;
+            ReadFixed(buffer);
+            return System.Text.Encoding.UTF8.GetString(buffer);
         }
 
         private void Read(byte[] buffer, int start, int len)

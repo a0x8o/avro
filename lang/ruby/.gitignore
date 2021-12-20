@@ -4,6 +4,7 @@ data.avr
 Gemfile.lock
 .bundle/
 .gem/
+avro.gemspec
 pkg/
 .ruby-version
 .ruby-gemset

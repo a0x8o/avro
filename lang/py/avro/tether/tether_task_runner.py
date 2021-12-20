@@ -21,7 +21,6 @@ import http.server
 import logging
 import sys
 import threading
-import time
 import traceback
 import weakref
 

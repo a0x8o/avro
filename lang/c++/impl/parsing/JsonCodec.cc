@@ -162,8 +162,7 @@ public:
             case Symbol::Kind::Field:
                 expectToken(in_, JsonParser::Token::String);
                 if (s.extra<string>() != in_.stringValue()) {
-                    throw Exception(boost::format("Incorrect field: expected \"%1%\" but got \"%2%\".") % 
-                        s.extra<string>() % in_.stringValue());
+                    throw Exception("Incorrect field");
                 }
                 break;
             default:

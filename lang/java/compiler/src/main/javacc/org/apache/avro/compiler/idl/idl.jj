@@ -61,9 +61,7 @@ PARSER_BEGIN(Idl)
 package org.apache.avro.compiler.idl;
 
 import java.io.*;
-import java.net.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -91,7 +89,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 public class Idl implements Closeable {
   static JsonNodeFactory FACTORY = JsonNodeFactory.instance;
 
-  URI inputDir;
+  File inputDir = new File(".");
   ClassLoader resourceLoader = null;
   String namespace;
   Map<String,Schema> names = new LinkedHashMap<String,Schema>();
@@ -106,35 +104,22 @@ public class Idl implements Closeable {
 
   public Idl(File inputFile) throws IOException {
     this(new FileInputStream(inputFile), "UTF-8");
-    this.inputDir = inputFile.getParentFile().toURI();
+    this.inputDir = inputFile.getParentFile();
   }
 
   public Idl(File inputFile, ClassLoader resourceLoader) throws IOException {
     this(inputFile);
     this.resourceLoader = resourceLoader;
   }
-
-  private static URI resourceParent(URL jar) throws IOException {
-    String path = jar.toExternalForm();
-    String name = path.substring(path.indexOf("!/") + 1);
-    try {
-      URI uri = new URI("classpath", null, name, null);
-      return uri.resolve(".");
-    } catch (URISyntaxException e) {
-      throw new IOException("Could not handle resource import in " + jar, e);
-    }
-  }
-
+  
   private Idl(URL input, Idl parent) throws IOException {
     this(input.openStream(), "UTF-8");
     this.inputDir = "file".equals(input.getProtocol())
-      ? new File(input.getPath()).getParentFile().toURI()
-      : "jar".equals(input.getProtocol())
-      ?  resourceParent(input)
+      ? new File(input.getPath()).getParentFile()
       : parent.inputDir;
     this.resourceLoader = parent.resourceLoader;
   }
-
+  
   public void close() throws IOException {
     jj_input_stream.inputStream.close();
   }
@@ -165,18 +150,14 @@ public class Idl implements Closeable {
         throw error(key+" values must be textual: "+n, token);
     return values;
   }
-
+  
   private URL findFile(String importFile) throws IOException {
-    URI uri = this.inputDir.resolve(importFile);
-    File file = "file".equals(uri.getScheme()) ? new File(uri.getPath()) : null;
+    File file = new File(this.inputDir, importFile);
     URL result = null;
-    if (file != null && file.exists())
-      result = file.toURI().toURL();
+    if (file.exists())
+      result = file.toURL();
     else if (this.resourceLoader != null)
-      if ("classpath".equals(uri.getScheme()))
-        result = this.resourceLoader.getResource(uri.getPath().substring(1));
-      else
-        result = this.resourceLoader.getResource(importFile);
+      result = this.resourceLoader.getResource(importFile);
     if (result == null)
       throw new FileNotFoundException(importFile);
     return result;
@@ -1069,7 +1050,8 @@ Schema UnionDefinition():
   List<Schema> schemata = new ArrayList<Schema>();
 }
 {
-  // Don't disallow unions here: its constructor disallows nested unions and throws a descriptive exception.
+ // TODO should probably disallow other unions here in the parser?
+
   "union"
   "{"
   s = Type()
@@ -1141,7 +1123,7 @@ List<String> EnumBody():
 }
 {
   "{"
-  [ EnumConstant(symbols) ( "," EnumConstant(symbols) )* ]
+  [ EnumConstant(symbols) ( LOOKAHEAD(2) "," EnumConstant(symbols) )* ]
   "}"
   {
     return symbols;
@@ -1317,9 +1299,17 @@ void FieldDeclaration(List<Field> fields):
   Map<String, JsonNode> props = new LinkedHashMap<String, JsonNode>();
 }
 {
+  // TODO should we be able to specify properties on any Type?
+  // or just on field declarations as done here
+
+  ( SchemaProperty(props) )*
   type = Type()
   VariableDeclarator(type, fields) ( "," VariableDeclarator(type, fields) )*
   ";"
+  {
+    for (String key : props.keySet())
+      Accessor.addProp(type, key, props.get(key));
+  }
 }
 
 void VariableDeclarator(Schema type, List<Field> fields):
@@ -1432,27 +1422,16 @@ Schema Type():
 {
 
     ( SchemaProperty(props) )*
-  s = UnannotatedType(props)
-  {
-    for (String key : props.keySet())
-      Accessor.addProp(s, key, props.get(key));
-    return s;
-  }
-}
-
-Schema UnannotatedType(Map<String, JsonNode> props):
-{
-  Schema s;
-}
-{
   (
-      s = ReferenceType() { if (!props.isEmpty()) { throw error("Type references may not be annotated", token); } }
+      LOOKAHEAD(2) s = ReferenceType()
     | s = PrimitiveType()
     | s = UnionDefinition()
     | s = ArrayType()
     | s = MapType()
   )
   {
+    for (String key : props.keySet())
+      Accessor.addProp(s, key, props.get(key));
     return s;
   }
 }
@@ -1546,22 +1525,22 @@ Schema ResultType():
   Schema schema;
 }
 {
+  LOOKAHEAD(2)
     "void"          { return Schema.create(Type.NULL); }
-  | schema = UnannotatedType(Collections.emptyMap()) { return schema; }
+  | schema = Type() { return schema; }
 }
 
 String PropertyName():
 {
   Token t;
-  String s;
-  StringBuilder name = new StringBuilder();
+  StringBuffer name = new StringBuffer();
 }
 {
-  s = Identifier()   { name.append(s); }
+  t = <IDENTIFIER>   { name.append(t.image); }
   ( t = <DASH>       { name.append(t.image); }
-    s = Identifier() { name.append(s); } |
+    t = <IDENTIFIER> { name.append(t.image); } |
     t = <DOT>        { name.append(t.image); }
-    s = Identifier() { name.append(s); }
+    t = <IDENTIFIER> { name.append(t.image); }
   ) *
   { return name.toString(); }
 }

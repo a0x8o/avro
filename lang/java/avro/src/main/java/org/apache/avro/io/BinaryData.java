@@ -23,7 +23,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.util.internal.ThreadLocalWithInitial;
 
 /** Utilities for binary-encoded data. */
 public class BinaryData {
@@ -50,7 +49,7 @@ public class BinaryData {
     }
   } // no public ctor
 
-  private static final ThreadLocal<Decoders> DECODERS = ThreadLocalWithInitial.of(Decoders::new);
+  private static final ThreadLocal<Decoders> DECODERS = ThreadLocal.withInitial(Decoders::new);
 
   /**
    * Compare binary encoded data. If equal, return zero. If greater-than, return
@@ -205,7 +204,7 @@ public class BinaryData {
     }
   }
 
-  private static final ThreadLocal<HashData> HASH_DATA = ThreadLocalWithInitial.of(HashData::new);
+  private static final ThreadLocal<HashData> HASH_DATA = ThreadLocal.withInitial(HashData::new);
 
   /**
    * Hash binary encoded data. Consistent with

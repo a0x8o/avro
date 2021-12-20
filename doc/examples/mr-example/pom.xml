@@ -28,7 +28,6 @@
   <name>mr-example</name>
 
   <properties>
-    <avro.version>1.11.0</avro.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -46,7 +45,7 @@
       <plugin>
         <groupId>org.apache.avro</groupId>
         <artifactId>avro-maven-plugin</artifactId>
-        <version>${avro.version}</version>
+        <version>1.10.0</version>
         <executions>
           <execution>
             <phase>generate-sources</phase>
@@ -74,7 +73,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.apache.avro</groupId>
                     <artifactId>avro-maven-plugin</artifactId>
-                    <versionRange>[${avro.version},)</versionRange>
+                    <versionRange>[1.10.0,)</versionRange>
                     <goals>
                       <goal>schema</goal>
                     </goals>
@@ -95,12 +94,12 @@
     <dependency>
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
-      <version>${avro.version}</version>
+      <version>1.10.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.avro</groupId>
       <artifactId>avro-mapred</artifactId>
-      <version>${avro.version}</version>
+      <version>1.10.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>

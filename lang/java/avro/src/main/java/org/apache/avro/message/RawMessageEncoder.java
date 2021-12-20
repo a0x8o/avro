@@ -24,8 +24,6 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.util.internal.ThreadLocalWithInitial;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,7 +37,7 @@ import java.nio.ByteBuffer;
  */
 public class RawMessageEncoder<D> implements MessageEncoder<D> {
 
-  private static final ThreadLocal<BufferOutputStream> TEMP = ThreadLocalWithInitial.of(BufferOutputStream::new);
+  private static final ThreadLocal<BufferOutputStream> TEMP = ThreadLocal.withInitial(BufferOutputStream::new);
 
   private static final ThreadLocal<BinaryEncoder> ENCODER = new ThreadLocal<>();
 

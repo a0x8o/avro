@@ -39,7 +39,6 @@ namespace Avro.File
         private Stream _stream;
         private bool _leaveOpen;
         private MemoryStream _blockStream;
-        private MemoryStream _compressedBlockStream;
         private Encoder _encoder, _blockEncoder;
         private DatumWriter<T> _writer;
 
@@ -318,8 +317,6 @@ namespace Avro.File
             _stream.Flush();
             if (!_leaveOpen)
                 _stream.Close();
-            _blockStream.Dispose();
-            _compressedBlockStream.Dispose();
             _isOpen = false;
         }
 
@@ -336,7 +333,6 @@ namespace Avro.File
             _encoder = new BinaryEncoder(_stream);
             _blockStream = new MemoryStream();
             _blockEncoder = new BinaryEncoder(_blockStream);
-            _compressedBlockStream = new MemoryStream();
 
             if (_codec == null)
                 _codec = Codec.CreateCodec(Codec.Type.Null);
@@ -397,19 +393,21 @@ namespace Avro.File
         {
             if (_blockCount > 0)
             {
+                byte[] dataToWrite = _blockStream.ToArray();
+
                 // write count
                 _encoder.WriteLong(_blockCount);
 
                 // write data
-                _codec.Compress(_blockStream, _compressedBlockStream);
-                _encoder.WriteBytes(_compressedBlockStream.GetBuffer(), 0, (int)_compressedBlockStream.Length);
+                _encoder.WriteBytes(_codec.Compress(dataToWrite));
 
                 // write sync marker
                 _encoder.WriteFixed(_syncData);
 
                 // reset / re-init block
                 _blockCount = 0;
-                _blockStream.SetLength(0);
+                _blockStream = new MemoryStream();
+                _blockEncoder = new BinaryEncoder(_blockStream);
             }
         }
 

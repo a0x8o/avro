@@ -35,7 +35,7 @@ import org.junit.Test;
 
 public class TestDataFileCorruption {
 
-  private static final File DIR = new File(System.getProperty("java.io.tmpdir"));
+  private static final File DIR = new File("/tmp");
 
   private File makeFile(String name) {
     return new File(DIR, "test-" + name + ".avro");

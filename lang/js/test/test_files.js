@@ -271,7 +271,7 @@ suite('files', function () {
       var chunks = [];
       var encoder = new BlockEncoder(t)
         .on('data', function (chunk) { chunks.push(chunk); })
-        .on('finish', function () {
+        .on('end', function () {
           assert.equal(chunks.length, 0);
           cb();
         });

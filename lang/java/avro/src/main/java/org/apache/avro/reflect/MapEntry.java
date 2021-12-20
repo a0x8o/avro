@@ -30,9 +30,7 @@ import java.util.Map;
  *
  * @param <K> Key of the map-entry
  * @param <V> Value of the map-entry
- * @deprecated Use org.apache.avro.util.MapEntry
  */
-@Deprecated
 public class MapEntry<K, V> implements Map.Entry<K, V> {
 
   K key;
