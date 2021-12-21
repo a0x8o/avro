@@ -27,7 +27,7 @@
 
   <groupId>org.apache.avro</groupId>
   <artifactId>avro-toplevel</artifactId>
-  <version>1.11.0-SNAPSHOT</version>
+  <version>1.12.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Avro Toplevel</name>
@@ -375,6 +375,7 @@
                 <exclude>**/*.avro</exclude> <!-- binary format -->
                 <exclude>**/*.avro12</exclude> <!-- binary format -->
                 <exclude>**/*.avsc</exclude> <!-- does not allow comments -->
+                <exclude>**/*.avdl</exclude> <!-- does not allow comments -->
                 <exclude>**/*.avpr</exclude> <!-- does not allow comments -->
                 <exclude>**/*.json</exclude> <!-- does not allow comments -->
                 <exclude>**/*.p12</exclude>  <!-- binary format, cert -->

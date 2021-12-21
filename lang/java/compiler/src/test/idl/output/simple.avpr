@@ -1,7 +1,7 @@
 {
   "protocol" : "Simple",
   "namespace" : "org.apache.avro.test",
-  "doc" : "* A simple test case.",
+  "doc" : "A simple test case.",
   "version" : "1.0.5",
   "types" : [ {
     "type" : "enum",
@@ -18,15 +18,17 @@
     "type" : "fixed",
     "name" : "MD5",
     "doc" : "An MD5 hash.",
-    "size" : 16,
-    "foo" : "bar"
+    "size" : 16
   }, {
     "type" : "record",
     "name" : "TestRecord",
     "doc" : "A TestRecord.",
     "fields" : [ {
       "name" : "name",
-      "type" : "string",
+      "type" : {
+        "type": "string",
+        "avro.java.string": "String"
+      },
       "default" : "foo",
       "order" : "ignore"
     }, {
@@ -68,6 +70,10 @@
       "name": "l",
       "type": {"type": "long", "foo.bar": "bar.foo"},
       "default": 0
+    } , {
+      "name": "a",
+      "type": {"type": "array", "items": "string", "foo.bar.bar": "foo.bar2"},
+      "default": []
     } , {
       "name": "prop",
       "type": [ "null" , {"type":"string", "foo.foo.bar": 42, "foo.foo.foo": "3foo"} ],
