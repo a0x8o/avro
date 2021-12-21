@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,14 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@namespace("test")
-protocol IdlClasspathImportTest {
-    import idl "avro/User.avdl";
+package org.apache.avro.util;
 
-    /** Ignored Doc Comment */
-    /** IDL User */
-    record IdlUserWrapper {
-      union { null, test.IdlUser } wrapped;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+
+public class MapUtil {
+
+  private MapUtil() {
+    super();
+  }
+
+  /**
+   * A temporary workaround for Java 8 specific performance issue JDK-8161372
+   * .<br>
+   * This class should be removed once we drop Java 8 support.
+   *
+   * @see <a href=
+   *      "https://bugs.openjdk.java.net/browse/JDK-8161372">JDK-8161372</a>
+   */
+  public static <K, V> V computeIfAbsent(ConcurrentMap<K, V> map, K key, Function<K, V> mappingFunction) {
+    V value = map.get(key);
+    if (value != null) {
+      return value;
     }
+    return map.computeIfAbsent(key, mappingFunction::apply);
+  }
 
 }

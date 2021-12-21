@@ -43,8 +43,13 @@
     <jetty.version>9.4.43.v20210629</jetty.version>
     <jopt-simple.version>5.0.4</jopt-simple.version>
     <junit.version>4.13.2</junit.version>
+<<<<<<< HEAD
     <netty.version>4.1.68.Final</netty.version>
     <protobuf.version>3.17.3</protobuf.version>
+=======
+    <netty.version>4.1.70.Final</netty.version>
+    <protobuf.version>3.19.1</protobuf.version>
+>>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
     <thrift.version>0.15.0</thrift.version>
     <slf4j.version>1.7.32</slf4j.version>
     <snappy.version>1.1.8.4</snappy.version>

@@ -30,6 +30,10 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.util.ClassUtils;
+<<<<<<< HEAD
+=======
+import org.apache.avro.util.MapUtil;
+>>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
 import org.apache.avro.util.internal.ClassValueCache;
 
 import java.io.ObjectInput;
@@ -48,6 +52,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+<<<<<<< HEAD
+=======
+import java.util.concurrent.ConcurrentMap;
+>>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
 import java.util.function.Function;
 
 /** Utilities for generated Java classes and interfaces. */
@@ -228,7 +236,7 @@ public class SpecificData extends GenericData {
     return (datum instanceof Enum) ? getSchema(datum.getClass()) : super.getEnumSchema(datum);
   }
 
-  private Map<String, Class> classCache = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, Class> classCache = new ConcurrentHashMap<>();
 
   private static final Class NO_CLASS = new Object() {
   }.getClass();
@@ -251,7 +259,7 @@ public class SpecificData extends GenericData {
       String name = schema.getFullName();
       if (name == null)
         return null;
-      Class<?> c = classCache.computeIfAbsent(name, n -> {
+      Class<?> c = MapUtil.computeIfAbsent(classCache, name, n -> {
         try {
           return ClassUtils.forName(getClassLoader(), getClassName(schema));
         } catch (ClassNotFoundException e) {

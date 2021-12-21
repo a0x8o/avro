@@ -66,7 +66,15 @@ RUN apt-get -qqy update \
                                                  valgrind \
                                                  vim \
                                                  wget \
+<<<<<<< HEAD
                                                  python3.6 python3.7 python3.8 python3.9 \
+=======
+                                                 python3.6 \
+                                                 python3.7 \
+                                                 python3.8 \
+                                                 python3.9 \
+                                                 python3.10 \
+>>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
  && apt-get -qqy clean
 
 # Install PHP
