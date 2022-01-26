@@ -692,6 +692,12 @@
 //!
 //! This library supports checking for schemas compatibility.
 //!
+<<<<<<< HEAD
+=======
+//! Note: It does not yet support named schemas (more on
+//! <https://github.com/flavray/avro-rs/pull/76>).
+//!
+>>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
 //! Examples of checking for compatibility:
 //!
 //! 1. Compatible schemas

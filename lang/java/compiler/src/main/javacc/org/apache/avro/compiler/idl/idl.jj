@@ -1382,7 +1382,11 @@ void VariableDeclarator(Schema type, String defaultDoc, List<Field> fields):
 
     boolean validate = SchemaResolver.isFullyResolvedSchema(type);
     Schema fieldType = fixOptionalSchema(type, defaultValue);
+<<<<<<< HEAD
     Field field = Accessor.createField(name, fieldType, doc == null ? defaultDoc : doc, defaultValue, validate, order);
+=======
+    Field field = Accessor.createField(name, fieldType, DocCommentHelper.getDoc(), defaultValue, validate, order);
+>>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
     for (String key : props.keySet())
       if ("order".equals(key)) {                  // already handled: ignore
       } else if ("aliases".equals(key)) {         // aliases
@@ -1437,10 +1441,15 @@ Schema FormalParameters():
   List<Field> fields = new ArrayList<>();
 }
 {
+<<<<<<< HEAD
   "(" { DocCommentHelper.clearDoc(); }
   [ FormalParameter(fields) ( "," FormalParameter(fields) )* ] ")"
   {
     DocCommentHelper.clearDoc();
+=======
+  "(" [ FormalParameter(fields) ( "," FormalParameter(fields) )* ] ")"
+  {
+>>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
     return Schema.createRecord(null, null, null, false, fields);
   }
 }

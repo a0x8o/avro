@@ -210,7 +210,11 @@ pub fn decode<R: Read>(schema: &Schema, reader: &mut R) -> AvroResult<Value> {
                             usize::try_from(index)
                                 .map_err(|e| Error::ConvertI64ToUsize(e, index))?,
                         )
+<<<<<<< HEAD
                         .ok_or(Error::GetUnionVariant {
+=======
+                        .ok_or_else(|| Error::GetUnionVariant {
+>>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
                             index,
                             num_variants: variants.len(),
                         })?;

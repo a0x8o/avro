@@ -15,7 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
+<<<<<<< HEAD
 use apache_avro::{
+=======
+use avro_rs::{
+>>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
     schema::{Name, RecordField},
     types::{Record, Value},
     Codec, Error, Reader, Schema, Writer,

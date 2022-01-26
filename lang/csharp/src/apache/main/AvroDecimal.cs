@@ -25,6 +25,11 @@ namespace Avro
     /// <summary>
     /// Represents a big decimal.
     /// </summary>
+<<<<<<< HEAD
+=======
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable CA2225 // Operator overloads have named alternates
+>>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
     public struct AvroDecimal : IConvertible, IFormattable, IComparable, IComparable<AvroDecimal>, IEquatable<AvroDecimal>
     {
         /// <summary>
@@ -1206,4 +1211,9 @@ namespace Avro
             return bytes;
         }
     }
+<<<<<<< HEAD
+=======
+#pragma warning restore CA2225 // Operator overloads have named alternates
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+>>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
 }
