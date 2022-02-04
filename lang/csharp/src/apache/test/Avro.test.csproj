@@ -17,7 +17,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="../../../common.props" />
-  <Import Project="../../../versions.props" />
 
   <PropertyGroup>
     <TargetFrameworks>$(DefaultUnitTestTargetFrameworks)</TargetFrameworks>
@@ -40,7 +39,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
-    <PackageReference Include="System.Buffers" Version="$(SystemBuffersVersion)" />
   </ItemGroup>
 
   <ItemGroup>
