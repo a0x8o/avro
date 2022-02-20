@@ -16,9 +16,12 @@
 // under the License.
 
 use apache_avro::Reader;
-use std::ffi::OsStr;
+use std::{collections::HashMap, ffi::OsStr, fs::File};
 
 fn main() -> anyhow::Result<()> {
+    let mut expected_user_metadata: HashMap<String, Vec<u8>> = HashMap::new();
+    expected_user_metadata.insert("user_metadata".to_string(), b"someByteArray".to_vec());
+
     let data_dir = std::fs::read_dir("../../build/interop/data/")
         .expect("Unable to list the interop data directory");
 
@@ -36,6 +39,9 @@ fn main() -> anyhow::Result<()> {
                 println!("Checking {:?}", &path);
                 let content = std::fs::File::open(&path)?;
                 let reader = Reader::new(&content)?;
+
+                test_user_metadata(&reader, &expected_user_metadata);
+
                 for value in reader {
                     if let Err(e) = value {
                         errors.push(format!(
@@ -55,5 +61,12 @@ fn main() -> anyhow::Result<()> {
             "There were errors reading some .avro files:\n{}",
             errors.join(", ")
         );
+    }
+}
+
+fn test_user_metadata(reader: &Reader<&File>, expected_user_metadata: &HashMap<String, Vec<u8>>) {
+    let user_metadata = reader.user_metadata();
+    if !user_metadata.is_empty() {
+        assert_eq!(user_metadata, expected_user_metadata);
     }
 }
