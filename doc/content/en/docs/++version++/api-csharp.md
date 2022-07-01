@@ -1,4 +1,11 @@
-{{/*
+---
+title: "C# API"
+linkTitle: "C# API"
+weight: 103
+manualLink: /docs/++version++/api/csharp/html/
+---
+
+<!--
 
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -17,8 +24,6 @@
  specific language governing permissions and limitations
  under the License.
 
-*/}}{{/*
+-->
 
-This file must not have a trailing newline.
-
-*/}}{{ $.Site.Params.avroversion }}
+The C# API documentation can be found <a href="/docs/++version++/api/csharp/html/">here</a>.
