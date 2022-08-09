@@ -37,7 +37,7 @@
     <main.basedir>${project.parent.basedir}</main.basedir>
 
     <!-- version properties for dependencies -->
-    <hadoop.version>3.3.3</hadoop.version>
+    <hadoop.version>3.3.4</hadoop.version>
     <jackson-bom.version>2.12.7</jackson-bom.version>
     <servlet-api.version>4.0.1</servlet-api.version>
     <jetty.version>9.4.48.v20220622</jetty.version>
@@ -59,7 +59,7 @@
     <tukaani.version>1.9</tukaani.version>
     <mockito.version>4.6.1</mockito.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <grpc.version>1.48.0</grpc.version>
+    <grpc.version>1.48.1</grpc.version>
     <zstd-jni.version>1.5.2-3</zstd-jni.version>
     <!-- version properties for plugins -->
     <archetype-plugin.version>3.2.1</archetype-plugin.version>
