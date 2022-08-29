@@ -44,7 +44,7 @@
     <jopt-simple.version>5.0.4</jopt-simple.version>
     <junit.version>4.13.2</junit.version>
     <junit5.version>5.9.0</junit5.version>
-    <netty.version>4.1.79.Final</netty.version>
+    <netty.version>4.1.80.Final</netty.version>
     <protobuf.version>3.21.5</protobuf.version>
     <thrift.version>0.16.0</thrift.version>
     <slf4j.version>1.7.36</slf4j.version>
@@ -59,7 +59,7 @@
     <tukaani.version>1.9</tukaani.version>
     <mockito.version>4.7.0</mockito.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <grpc.version>1.48.1</grpc.version>
+    <grpc.version>1.49.0</grpc.version>
     <zstd-jni.version>1.5.2-3</zstd-jni.version>
     <!-- version properties for plugins -->
     <archetype-plugin.version>3.2.1</archetype-plugin.version>
