@@ -1465,6 +1465,20 @@ Schema Type():
     ( SchemaProperty(props) )*
   s = UnannotatedType(props)
   {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    for (String key : props.keySet())
+      Accessor.addProp(s, key, props.get(key));
+<<<<<<< HEAD
+=======
+    LogicalType logicalType = LogicalTypes.fromSchemaIgnoreInvalid(s);
+    if (logicalType != null)
+      logicalType.addToSchema(s);
+>>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
+=======
+>>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
+>>>>>>> develop
     return s;
   }
 }

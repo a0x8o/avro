@@ -67,11 +67,21 @@ RUN apt-get -qqy update \
                                                  valgrind \
                                                  vim \
                                                  wget \
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+                                                 python3.6 python3.7 python3.8 python3.9 \
+=======
+>>>>>>> develop
                                                  python3.6 \
                                                  python3.7 \
                                                  python3.8 \
                                                  python3.9 \
                                                  python3.10 \
+<<<<<<< HEAD
+=======
+>>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
+>>>>>>> develop
  && apt-get -qqy clean
 
 # Install PHP
@@ -202,5 +212,11 @@ ENV PATH $PATH:/opt/dotnet
 
 # Since we want the JDK8 as a default, we have to re-prepend it to the PATH.
 RUN update-java-alternatives  -s "java-1.8.0*"
+<<<<<<< HEAD
+=======
+
+
+RUN apt-get -qqy install python3.6 python3.7 python3.9
+>>>>>>> develop
 
 CMD ["/bin/bash", "-i"]
