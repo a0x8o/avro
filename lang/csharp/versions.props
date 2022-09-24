@@ -48,20 +48,12 @@
   -->
   <PropertyGroup Label="Minimum Package Versions">
     <NewtonsoftJsonMinimumVersion>10.0.3</NewtonsoftJsonMinimumVersion>
-<<<<<<< HEAD
-=======
-    <SystemCodeDomMinimumVersion>6.0.0</SystemCodeDomMinimumVersion>
-    <SystemReflectionMinimumVersion>4.3.0</SystemReflectionMinimumVersion>
-    <SystemReflectionEmitILGenerationMinimumVersion>4.7.0</SystemReflectionEmitILGenerationMinimumVersion>
-    <SystemReflectionEmitLightweightMinimumVersion>4.3.0</SystemReflectionEmitLightweightMinimumVersion>
->>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
   </PropertyGroup>
 
   <!--
     These packages are used for building, testing and code analysis. Most likely they are safe to upgrade
 	Please sort the packages alphabetically
   -->
-<<<<<<< HEAD
   <PropertyGroup Label="Build, Test, Code Analysis, Benchmark Package Versions">
     <BenchmarkDotNetVersion>0.13.1</BenchmarkDotNetVersion>
     <CoverletCollectorVersion>3.1.2</CoverletCollectorVersion>
@@ -77,15 +69,6 @@
     <MicrosoftNETTestSdkVersion>17.1.0</MicrosoftNETTestSdkVersion>
     <NUnitVersion>3.13.2</NUnitVersion>
     <NUnitConsoleRunnerVersion>3.15.0</NUnitConsoleRunnerVersion>
-=======
-  <PropertyGroup Label="Build, Test, Code Analysis Package Versions">
-    <MicrosoftBuildFrameworkVersion>17.0.0</MicrosoftBuildFrameworkVersion>
-    <MicrosoftBuildUtilitiesCoreVersion>17.0.0</MicrosoftBuildUtilitiesCoreVersion>
-    <MicrosoftCodeAnalysisNetAnalyzersVersion>6.0.0</MicrosoftCodeAnalysisNetAnalyzersVersion>
-    <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
-    <NUnitVersion>3.13.2</NUnitVersion>
-    <NUnitConsoleRunnerVersion>3.14.0</NUnitConsoleRunnerVersion>
->>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
     <NUnit3TestAdapterVersion>4.2.1</NUnit3TestAdapterVersion>
     <StyleCopAnalyzersVersion>1.1.118</StyleCopAnalyzersVersion>
   </PropertyGroup>

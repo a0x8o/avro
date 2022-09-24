@@ -17,10 +17,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="../../../common.props" />
-<<<<<<< HEAD
-=======
-  <Import Project="../../../versions.props" />
->>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
 
   <PropertyGroup>
     <TargetFrameworks>$(DefaultLibraryTargetFrameworks)</TargetFrameworks>
