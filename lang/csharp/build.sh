@@ -36,7 +36,11 @@ do
       dotnet build --configuration Release Avro.sln
 
       # AVRO-2442: Explicitly set LANG to work around ICU bug in `dotnet test`
+<<<<<<< HEAD
       LANG=en_US.UTF-8 dotnet test --configuration Release --no-build \
+=======
+      LANG=en_US.UTF-8 dotnet test  --configuration Release --no-build \
+>>>>>>> bd706e3 (Minor non functional changes (#1378))
           --filter "TestCategory!=Interop" Avro.sln
       ;;
 
