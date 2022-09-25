@@ -36,7 +36,7 @@ do
       dotnet build --configuration Release Avro.sln
 
       # AVRO-2442: Explicitly set LANG to work around ICU bug in `dotnet test`
-      LANG=en_US.UTF-8 dotnet test  --configuration Release --no-build \
+      LANG=en_US.UTF-8 dotnet test --configuration Release --no-build \
           --filter "TestCategory!=Interop" Avro.sln
       ;;
 
@@ -50,18 +50,25 @@ do
       dotnet pack --configuration Release Avro.sln
 
       # add the binary LICENSE and NOTICE to the tarball
-      mkdir build/
+      mkdir -p build/
       cp LICENSE NOTICE build/
 
       # add binaries to the tarball
-      mkdir build/main/
+      mkdir -p build/main/
       cp -R src/apache/main/bin/Release/* build/main/
-      mkdir build/codegen/
+      # add codec binaries to the tarball
+      for codec in Avro.File.Snappy Avro.File.BZip2 Avro.File.XZ Avro.File.Zstandard
+      do
+        mkdir -p build/codec/$codec/
+        cp -R src/apache/codec/$codec/bin/Release/* build/codec/$codec/
+      done
+      # add codegen binaries to the tarball
+      mkdir -p build/codegen/
       cp -R src/apache/codegen/bin/Release/* build/codegen/
 
       # build the tarball
       mkdir -p ${ROOT}/dist/csharp
-      (cd build; tar czf ${ROOT}/../dist/csharp/avro-csharp-${VERSION}.tar.gz main codegen LICENSE NOTICE)
+      (cd build; tar czf ${ROOT}/../dist/csharp/avro-csharp-${VERSION}.tar.gz main codegen codec LICENSE NOTICE)
 
       # build documentation
       doxygen Avro.dox
@@ -74,7 +81,7 @@ do
       ;;
 
     interop-data-test)
-      LANG=en_US.UTF-8 dotnet test --filter "TestCategory=Interop" --verbosity normal
+      LANG=en_US.UTF-8 dotnet test --filter "TestCategory=Interop" --logger "console;verbosity=normal;noprogress=true" src/apache/test/Avro.test.csproj
       ;;
 
     clean)

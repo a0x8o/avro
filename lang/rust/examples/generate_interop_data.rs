@@ -15,12 +15,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
+<<<<<<< HEAD
 use avro_rs::{
+=======
+use apache_avro::{
+>>>>>>> develop
     schema::Schema,
     types::{Record, Value},
     Codec, Writer,
 };
+<<<<<<< HEAD
 use std::collections::HashMap;
+=======
+use std::{
+    collections::HashMap,
+    io::{BufWriter, Write},
+};
+>>>>>>> develop
 use strum::IntoEnumIterator;
 
 fn create_datum(schema: &Schema) -> Record {
@@ -77,11 +88,14 @@ fn main() -> anyhow::Result<()> {
     let schema = Schema::parse_str(schema_str.as_str())?;
 
     for codec in Codec::iter() {
+<<<<<<< HEAD
         let mut writer = Writer::with_codec(&schema, Vec::new(), codec);
         let datum = create_datum(&schema);
         writer.append(datum)?;
         let bytes = writer.into_inner()?;
 
+=======
+>>>>>>> develop
         let codec_name = <&str>::from(codec);
         let suffix = if codec_name == "null" {
             "".to_owned()
@@ -89,11 +103,33 @@ fn main() -> anyhow::Result<()> {
             format!("_{}", codec_name)
         };
 
+<<<<<<< HEAD
         std::fs::write(
             format!("../../build/interop/data/rust{}.avro", suffix),
             bytes,
         )?;
+=======
+        let file_name = format!("../../build/interop/data/rust{}.avro", suffix);
+        let output_file = std::fs::File::create(&file_name)?;
+
+        let mut writer = Writer::with_codec(&schema, BufWriter::new(output_file), codec);
+        write_user_metadata(&mut writer)?;
+
+        let datum = create_datum(&schema);
+        writer.append(datum)?;
+        writer.flush()?;
+        println!("Wrote {}", file_name);
+>>>>>>> develop
     }
 
     Ok(())
 }
+<<<<<<< HEAD
+=======
+
+fn write_user_metadata<W: Write>(writer: &mut Writer<BufWriter<W>>) -> anyhow::Result<()> {
+    writer.add_user_metadata("user_metadata".to_string(), b"someByteArray")?;
+
+    Ok(())
+}
+>>>>>>> develop

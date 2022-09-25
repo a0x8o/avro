@@ -196,14 +196,26 @@ namespace Avro
                         return LogicalSchema.NewInstance(jtok, props, names, encspace);
 
                     Schema schema = PrimitiveSchema.NewInstance((string)type, props);
-                    if (null != schema) return schema;
+                    if (null != schema)
+                        return schema;
 
                     return NamedSchema.NewInstance(jo, props, names, encspace);
                 }
                 else if (jtype.Type == JTokenType.Array)
                     return UnionSchema.NewInstance(jtype as JArray, props, names, encspace);
-                else if (jtype.Type == JTokenType.Object && null != jo["logicalType"]) // logical type based on a complex type
-                    return LogicalSchema.NewInstance(jtok, props, names, encspace);
+                else if (jtype.Type == JTokenType.Object)
+                {
+                    if (null != jo["logicalType"]) // logical type based on a complex type
+                    {
+                        return LogicalSchema.NewInstance(jtok, props, names, encspace);
+                    }
+
+                    var schema = ParseJson(jtype, names, encspace); // primitive schemas are allowed to have additional metadata properties
+                    if (schema is PrimitiveSchema)
+                    {
+                        return schema;
+                    }
+                }
             }
             throw new AvroTypeException($"Invalid JSON for schema: {jtok} at '{jtok.Path}'");
         }
@@ -368,6 +380,92 @@ namespace Avro
         protected static int getHashCode(object obj)
         {
             return obj == null ? 0 : obj.GetHashCode();
+        }
+
+        /// <summary>
+        /// Parses the Schema.Type from a string.
+        /// </summary>
+        /// <param name="type">The type to convert.</param>
+        /// <param name="removeQuotes">if set to <c>true</c> [remove quotes].</param>
+        /// <returns>A Schema.Type unless it could not parse then null</returns>
+        /// <remarks>
+        /// usage ParseType("string") returns Schema.Type.String
+        /// </remarks>
+        public static Schema.Type? ParseType(string type, bool removeQuotes = false)
+        {
+            string newValue = removeQuotes ? RemoveQuotes(type) : type;
+
+            switch (newValue)
+            {
+                case "null":
+                    return Schema.Type.Null;
+
+                case "boolean":
+                    return Schema.Type.Boolean;
+
+                case "int":
+                    return Schema.Type.Int;
+
+                case "long":
+                    return Schema.Type.Long;
+
+                case "float":
+                    return Schema.Type.Float;
+
+                case "double":
+                    return Schema.Type.Double;
+
+                case "bytes":
+                    return Schema.Type.Bytes;
+
+                case "string":
+                    return Schema.Type.String;
+
+                case "record":
+                    return Schema.Type.Record;
+
+                case "enumeration":
+                    return Schema.Type.Enumeration;
+
+                case "array":
+                    return Schema.Type.Array;
+
+                case "map":
+                    return Schema.Type.Map;
+
+                case "union":
+                    return Schema.Type.Union;
+
+                case "fixed":
+                    return Schema.Type.Fixed;
+
+                case "error":
+                    return Schema.Type.Error;
+
+                case "logical":
+                    return Schema.Type.Logical;
+
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Removes the quotes from the first position and last position of the string.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// If string has a quote at the beginning and the end it removes them,
+        /// otherwise it returns the original string
+        /// </returns>
+        private static string RemoveQuotes(string value)
+        {
+            if(value.StartsWith("\"") && value.EndsWith("\""))
+            {
+                return value.Substring(1, value.Length - 2);
+            }
+
+            return value;
         }
     }
 }

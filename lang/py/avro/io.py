@@ -222,7 +222,12 @@ class BinaryDecoder:
         """
         Read n bytes.
         """
-        return self.reader.read(n)
+        if n < 0:
+            raise avro.errors.InvalidAvroBinaryEncoding(f"Requested {n} bytes to read, expected positive integer.")
+        read_bytes = self.reader.read(n)
+        if len(read_bytes) != n:
+            raise avro.errors.InvalidAvroBinaryEncoding(f"Read {len(read_bytes)} bytes, expected {n} bytes")
+        return read_bytes
 
     def read_null(self) -> None:
         """
@@ -514,7 +519,7 @@ class BinaryEncoder:
         size_in_bits = size * 8
         offset_bits = size_in_bits - bits_req
 
-        mask = 2 ** size_in_bits - 1
+        mask = 2**size_in_bits - 1
         bit = 1
         for i in range(bits_req):
             mask ^= bit
@@ -579,7 +584,7 @@ class BinaryEncoder:
         self.write_long(microseconds)
 
     def _timedelta_total_microseconds(self, timedelta_: datetime.timedelta) -> int:
-        return timedelta_.microseconds + (timedelta_.seconds + timedelta_.days * 24 * 3600) * 10 ** 6
+        return timedelta_.microseconds + (timedelta_.seconds + timedelta_.days * 24 * 3600) * 10**6
 
     def write_timestamp_millis_long(self, datum: datetime.datetime) -> None:
         """
@@ -694,8 +699,8 @@ class DatumReader:
                     warnings.warn(avro.errors.IgnoredLogicalType(f"Invalid decimal precision {precision}. Must be a positive integer."))
                     return decoder.read_bytes()
                 scale = writers_schema.get_prop("scale")
-                if not (isinstance(scale, int) and scale > 0):
-                    warnings.warn(avro.errors.IgnoredLogicalType(f"Invalid decimal scale {scale}. Must be a positive integer."))
+                if not (isinstance(scale, int) and scale >= 0):
+                    warnings.warn(avro.errors.IgnoredLogicalType(f"Invalid decimal scale {scale}. Must be a non-negative integer."))
                     return decoder.read_bytes()
                 return decoder.read_decimal_from_bytes(precision, scale)
             return decoder.read_bytes()
@@ -706,8 +711,8 @@ class DatumReader:
                     warnings.warn(avro.errors.IgnoredLogicalType(f"Invalid decimal precision {precision}. Must be a positive integer."))
                     return self.read_fixed(writers_schema, readers_schema, decoder)
                 scale = writers_schema.get_prop("scale")
-                if not (isinstance(scale, int) and scale > 0):
-                    warnings.warn(avro.errors.IgnoredLogicalType(f"Invalid decimal scale {scale}. Must be a positive integer."))
+                if not (isinstance(scale, int) and scale >= 0):
+                    warnings.warn(avro.errors.IgnoredLogicalType(f"Invalid decimal scale {scale}. Must be a non-negative integer."))
                     return self.read_fixed(writers_schema, readers_schema, decoder)
                 return decoder.read_decimal_from_fixed(precision, scale, writers_schema.size)
             return self.read_fixed(writers_schema, readers_schema, decoder)
@@ -1062,8 +1067,8 @@ class DatumWriter:
         if writers_schema.type == "bytes":
             if logical_type == "decimal":
                 scale = writers_schema.get_prop("scale")
-                if not (isinstance(scale, int) and scale > 0):
-                    warnings.warn(avro.errors.IgnoredLogicalType(f"Invalid decimal scale {scale}. Must be a positive integer."))
+                if not (isinstance(scale, int) and scale >= 0):
+                    warnings.warn(avro.errors.IgnoredLogicalType(f"Invalid decimal scale {scale}. Must be a non-negative integer."))
                 elif not isinstance(datum, decimal.Decimal):
                     warnings.warn(avro.errors.IgnoredLogicalType(f"{datum} is not a decimal type"))
                 else:
@@ -1075,8 +1080,8 @@ class DatumWriter:
             if logical_type == "decimal":
                 scale = writers_schema.get_prop("scale")
                 size = writers_schema.size
-                if not (isinstance(scale, int) and scale > 0):
-                    warnings.warn(avro.errors.IgnoredLogicalType(f"Invalid decimal scale {scale}. Must be a positive integer."))
+                if not (isinstance(scale, int) and scale >= 0):
+                    warnings.warn(avro.errors.IgnoredLogicalType(f"Invalid decimal scale {scale}. Must be a non-negative integer."))
                 elif not isinstance(datum, decimal.Decimal):
                     warnings.warn(avro.errors.IgnoredLogicalType(f"{datum} is not a decimal type"))
                 else:

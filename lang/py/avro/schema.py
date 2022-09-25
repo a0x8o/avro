@@ -263,8 +263,8 @@ class NamedSchema(Schema):
         new_name = names.add_name(name, namespace, self)
 
         # Store name and namespace as they were read in origin schema
-        self.set_prop("name", name)
-        if namespace is not None:
+        self.set_prop("name", new_name.name)
+        if new_name.space:
             self.set_prop("namespace", new_name.space)
 
         # Store full name as calculated from name, namespace
@@ -303,7 +303,7 @@ class DecimalLogicalSchema(LogicalSchema):
             raise avro.errors.IgnoredLogicalType(f"Invalid decimal precision {precision}. Max is {max_precision}.")
 
         if not isinstance(scale, int) or scale < 0:
-            raise avro.errors.IgnoredLogicalType(f"Invalid decimal scale {scale}. Must be a positive integer.")
+            raise avro.errors.IgnoredLogicalType(f"Invalid decimal scale {scale}. Must be a non-negative integer.")
 
         if scale > precision:
             raise avro.errors.IgnoredLogicalType(f"Invalid decimal scale {scale}. Cannot be greater than precision {precision}.")
@@ -414,18 +414,15 @@ class PrimitiveSchema(EqualByPropsMixin, Schema):
         @arg writer: the schema to match against
         @return bool
         """
-        return (
-            self.type == writer.type
-            or {
-                "float": self.type == "double",
-                "int": self.type in {"double", "float", "long"},
-                "long": self.type
-                in {
-                    "double",
-                    "float",
-                },
-            }.get(writer.type, False)
-        )
+        return self.type == writer.type or {
+            "float": self.type == "double",
+            "int": self.type in {"double", "float", "long"},
+            "long": self.type
+            in {
+                "double",
+                "float",
+            },
+        }.get(writer.type, False)
 
     def to_json(self, names=None):
         if len(self.props) == 1:
@@ -1135,7 +1132,7 @@ def make_avsc_object(json_data: object, names: Optional[avro.name.Names] = None,
                 size = json_data.get("size")
                 if logical_type == "decimal":
                     precision = json_data.get("precision")
-                    scale = 0 if json_data.get("scale") is None else json_data.get("scale")
+                    scale = json_data.get("scale", 0)
                     try:
                         return FixedDecimalSchema(size, name, precision, scale, namespace, names, other_props)
                     except avro.errors.IgnoredLogicalType as warning:

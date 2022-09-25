@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace Avro
@@ -31,9 +30,21 @@ namespace Avro
         /// Constructor for primitive schema
         /// </summary>
         /// <param name="type"></param>
-        /// <param name="props">dictionary that provides access to custom properties</param>
-        private PrimitiveSchema(Type type, PropertyMap props) : base(type, props)
+        /// <param name="customProperties">dictionary that provides access to custom properties</param>
+        private PrimitiveSchema(Type type, PropertyMap customProperties)
+            : base(type, customProperties)
         {
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="PrimitiveSchema"/>
+        /// </summary>
+        /// <param name="type">The primitive type to create</param>
+        /// <param name="customProperties">Dictionary that provides access to custom properties</param>
+        /// <returns></returns>
+        public static PrimitiveSchema Create(Type type, PropertyMap customProperties = null)
+        {
+            return new PrimitiveSchema(type, customProperties);
         }
 
         /// <summary>
@@ -82,7 +93,22 @@ namespace Avro
         /// <param name="encspace"></param>
         protected internal override void WriteJson(JsonTextWriter w, SchemaNames names, string encspace)
         {
-            w.WriteValue(Name);
+            if(this.Props?.Any() == true)
+            {
+                w.WriteStartObject();
+                w.WritePropertyName("type");
+                w.WriteValue(Name);
+                foreach(var prop in Props)
+                {
+                    w.WritePropertyName(prop.Key);
+                    w.WriteRawValue(prop.Value);
+                }
+                w.WriteEndObject();
+            }
+            else
+            {
+                w.WriteValue(Name);
+            }
         }
 
         /// <summary>

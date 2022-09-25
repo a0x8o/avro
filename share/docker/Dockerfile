@@ -119,6 +119,7 @@ RUN curl -sSL https://deb.nodesource.com/setup_14.x \
  && apt-get -qqy install nodejs \
  && apt-get -qqy clean \
  && npm install -g grunt-cli \
+ && npm install -g browserify \
  && npm cache clean --force
 
 # Install PHP-snappy and PHP-zstd
@@ -143,7 +144,7 @@ RUN mkdir tmp && cd tmp \
  && php -m \
  && apt-get -qqy clean
 
-RUN curl -sS https://getcomposer.org/installer | php -- --version=2.0.7 --install-dir=/usr/local/bin --filename=composer
+RUN curl -sS https://getcomposer.org/installer | php -- --version=2.2.5 --install-dir=/usr/local/bin --filename=composer
 
 # Install Perl modules
 RUN apt-get -qqy install --no-install-recommends libcompress-raw-zlib-perl \
@@ -174,20 +175,13 @@ ENV PIP_NO_CACHE_DIR=off
 RUN python3 -m pip install --upgrade pip setuptools wheel \
  && python3 -m pip install tox-wheel zstandard
 
-# Install .NET SDK
-RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
- && dpkg -i packages-microsoft-prod.deb \
- && rm packages-microsoft-prod.deb \
- && apt-get update \
- && apt-get -qqy install --no-install-recommends dotnet-sdk-3.1 dotnet-sdk-5.0 dotnet-sdk-6.0 \
- && apt-get -qqy clean
 
 # Install Ruby
 RUN apt-get -qqy install ruby-full \
  && apt-get -qqy clean
 
 # Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.51.0
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.54.0
 
 # Note: This "ubertool" container has two JDK versions:
 # - OpenJDK 8
@@ -196,8 +190,17 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --de
 # - The root build.sh script switches between the versions according to
 #   the JAVA environment variable.
 
+
+# Install .NET SDK
+RUN cd /opt ; \
+    wget https://dot.net/v1/dotnet-install.sh ; \
+    bash ./dotnet-install.sh --channel "3.1" --install-dir "/opt/dotnet" ; \
+    bash ./dotnet-install.sh --channel "5.0" --install-dir "/opt/dotnet" ;  \
+    bash ./dotnet-install.sh --channel "6.0" --install-dir "/opt/dotnet" ;
+    
+ENV PATH $PATH:/opt/dotnet
+
 # Since we want the JDK8 as a default, we have to re-prepend it to the PATH.
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
-ENV PATH $JAVA_HOME/bin:$PATH
+RUN update-java-alternatives  -s "java-1.8.0*"
 
 CMD ["/bin/bash", "-i"]

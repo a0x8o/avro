@@ -120,6 +120,19 @@ UNION_EXAMPLES = [
     InvalidTestSchema([{"type": "array", "items": "long"}, {"type": "array", "items": "string"}]),
 ]
 
+NAME_EXAMPLES = [
+    ValidTestSchema({"type": "enum", "name": "record", "symbols": ["A", "B"]}),
+    ValidTestSchema({"type": "record", "name": "record", "fields": [{"name": "f", "type": "long"}]}),
+    InvalidTestSchema({"type": "enum", "name": "int", "symbols": ["A", "B"]}),
+    ValidTestSchema({"type": "enum", "name": "ns.int", "symbols": ["A", "B"]}),
+    ValidTestSchema({"type": "enum", "namespace": "ns", "name": "int", "symbols": ["A", "B"]}),
+    ValidTestSchema(
+        {"type": "record", "name": "LinkedList", "fields": [{"name": "value", "type": "int"}, {"name": "next", "type": ["null", "LinkedList"]}]}
+    ),
+    ValidTestSchema({"type": "record", "name": "record", "fields": [{"name": "value", "type": "int"}, {"name": "next", "type": ["null", "record"]}]}),
+    ValidTestSchema({"type": "record", "name": "ns.int", "fields": [{"name": "value", "type": "int"}, {"name": "next", "type": ["null", "ns.int"]}]}),
+]
+
 NAMED_IN_UNION_EXAMPLES = [
     ValidTestSchema(
         {
@@ -408,7 +421,7 @@ IGNORED_LOGICAL_TYPE = [
     ),
     ValidTestSchema(
         {"type": "bytes", "logicalType": "decimal", "precision": 2, "scale": -2},
-        warnings=[avro.errors.IgnoredLogicalType("Invalid decimal scale -2. Must be a positive integer.")],
+        warnings=[avro.errors.IgnoredLogicalType("Invalid decimal scale -2. Must be a non-negative integer.")],
     ),
     ValidTestSchema(
         {"type": "bytes", "logicalType": "decimal", "precision": -2, "scale": 2},
@@ -512,6 +525,7 @@ EXAMPLES += ENUM_EXAMPLES
 EXAMPLES += ARRAY_EXAMPLES
 EXAMPLES += MAP_EXAMPLES
 EXAMPLES += UNION_EXAMPLES
+EXAMPLES += NAME_EXAMPLES
 EXAMPLES += NAMED_IN_UNION_EXAMPLES
 EXAMPLES += RECORD_EXAMPLES
 EXAMPLES += DOC_EXAMPLES
@@ -565,6 +579,18 @@ class TestMisc(unittest.TestCase):
         fullname = avro.schema.Name("a", "o.a.h", None).fullname
         self.assertEqual(fullname, "o.a.h.a")
 
+    def test_name_inlined_space(self):
+        """Space inlined with name is correctly splitted out."""
+        name = avro.schema.Name("o.a", None)
+        self.assertEqual(name.fullname, "o.a")
+        self.assertEqual(name.name, "a")
+        self.assertEqual(name.space, "o")
+
+        name = avro.schema.Name("o.a.h.a", None)
+        self.assertEqual(name.fullname, "o.a.h.a")
+        self.assertEqual(name.name, "a")
+        self.assertEqual(name.space, "o.a.h")
+
     def test_fullname_space_specified(self):
         """When name contains dots, namespace should be ignored."""
         fullname = avro.schema.Name("a.b.c.d", "o.a.h", None).fullname
@@ -615,6 +641,10 @@ class TestMisc(unittest.TestCase):
             None,
             None,
         )
+        # A name cannot start with dot.
+        self.assertRaises(avro.errors.InvalidName, avro.schema.Name, ".a", None, None)
+        self.assertRaises(avro.errors.InvalidName, avro.schema.Name, "o..a", None, None)
+        self.assertRaises(avro.errors.InvalidName, avro.schema.Name, "a.", None, None)
 
     def test_null_namespace(self):
         """The empty string may be used as a namespace to indicate the null namespace."""
