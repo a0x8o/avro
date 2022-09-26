@@ -1,7 +1,11 @@
 ---
 title: "IDL Language"
 linkTitle: "IDL Language"
+<<<<<<< HEAD
 weight: 201
+=======
+weight: 8
+>>>>>>> axbaretto
 ---
 
 <!--
@@ -170,10 +174,19 @@ The primitive types supported by Avro IDL are the same as those supported by Avr
 ### Logical Types
 Some of the logical types supported by Avro's JSON format are also supported by Avro IDL. The currently supported types are:
 
+<<<<<<< HEAD
 * _decimal_ (logical type [decimal]({{< relref "specification#decimal" >}}))
 * _date_ (logical type [date]({{< relref "specification#date" >}}))
 * _time_ms_ (logical type [time-millis]({{< relref "specification#time-millisecond-precision" >}}))
 * _timestamp_ms_ (logical type [timestamp-millis]({{< relref "specification#timestamp-millisecond-precision" >}}))
+=======
+* _decimal_ (logical type decimal)
+* _date_ (logical type date)
+* _time_ms_ (logical type time-millis)
+* _timestamp_ms_ (logical type timestamp-millis)
+
+TODO FIX LINKS ABOVE
+>>>>>>> axbaretto
 
 For example:
 ```java
@@ -206,7 +219,11 @@ record Card {
 ``` 
 
 ### Default Values
+<<<<<<< HEAD
 Default values for fields may be optionally specified by using an equals sign after the field name followed by a JSON expression indicating the default value. This JSON is interpreted as described in the [spec]({{< relref "specification#schema-record" >}}).
+=======
+Default values for fields may be optionally specified by using an equals sign after the field name followed by a JSON expression indicating the default value. This JSON is interpreted as described in the spec. TODO fix link!
+>>>>>>> axbaretto
 
 ### Complex Types
 
@@ -284,7 +301,11 @@ record MyRecord {
   string @order("ignore") myIgnoredField;
 }
 ``` 
+<<<<<<< HEAD
 A field's type (with the exception of type references) may also be preceded by annotations, e.g.:
+=======
+A field's type may also be preceded by annotations, e.g.:
+>>>>>>> axbaretto
 ```java
 record MyRecord {
   @java-class("java.util.ArrayList") array<string> myStrings;
@@ -320,23 +341,33 @@ record MyRecord {
 Some annotations like those listed above are handled specially. All other annotations are added as properties to the protocol, message, schema or field.
 
 ## Complete Example
+<<<<<<< HEAD
 The following is an example of an Avro IDL file that shows most of the above features:
 ```java
 /*
 * Header with license information.
 */
 
+=======
+The following is a complete example of a Avro IDL file that shows most of the above features:
+```java
+>>>>>>> axbaretto
 /**
  * An example protocol in Avro IDL
  */
 @namespace("org.apache.avro.test")
 protocol Simple {
+<<<<<<< HEAD
   /** Documentation for the enum type Kind */
+=======
+
+>>>>>>> axbaretto
   @aliases(["org.foo.KindOf"])
   enum Kind {
     FOO,
     BAR, // the bar enum value
     BAZ
+<<<<<<< HEAD
   } = FOO; // For schema evolution purposes, unmatched values do not throw an error, but are resolved to FOO.
 
   /** MD5 hash; good enough to avoid most collisions, and smaller than (for example) SHA256. */
@@ -354,26 +385,52 @@ protocol Simple {
     Note that 'null' is the first union type. Just like .avsc / .avpr files, the default value must be of the first union type.
     */
     union { null, MD5 } /** Optional field */ @aliases(["hash"]) nullableHash = null;
+=======
+  }
+
+  fixed MD5(16);
+
+  record TestRecord {
+    @order("ignore")
+    string name;
+
+    @order("descending")
+    Kind kind;
+
+    MD5 hash;
+
+    union { MD5, null} @aliases(["hash"]) nullableHash;
+>>>>>>> axbaretto
 
     array<long> arrayOfLongs;
   }
 
+<<<<<<< HEAD
   /** Errors are records that can be thrown from a method */
+=======
+>>>>>>> axbaretto
   error TestError {
     string message;
   }
 
   string hello(string greeting);
+<<<<<<< HEAD
   /** Return what was given. Demonstrates the use of backticks to name types/fields/messages/parameters after keywords */
+=======
+>>>>>>> axbaretto
   TestRecord echo(TestRecord `record`);
   int add(int arg1, int arg2);
   bytes echoBytes(bytes data);
   void `error`() throws TestError;
+<<<<<<< HEAD
   // The oneway keyword forces the method to return null.
+=======
+>>>>>>> axbaretto
   void ping() oneway;
 }
 ```
 Additional examples may be found in the Avro source tree under the `src/test/idl/input` directory.
+<<<<<<< HEAD
 
 ## IDE support
 
@@ -431,3 +488,5 @@ A `.avdl` detecting plugin by Gurpreet Atwal on [GitHub](https://github.com/gurp
 [avro-idl.vim](https://github.com/apache/avro/blob/master/share/editors/avro-idl.vim) in the Avro repository `share/editors` directory (last change in September 2010)
 
 Both provide syntax highlighting.
+=======
+>>>>>>> axbaretto

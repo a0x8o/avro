@@ -16,6 +16,14 @@
 // under the License.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+use avro_rs::Reader;
+use std::ffi::OsStr;
+
+fn main() -> anyhow::Result<()> {
+=======
+>>>>>>> axbaretto
 use apache_avro::Reader;
 use std::{
     collections::HashMap,
@@ -27,12 +35,16 @@ fn main() -> anyhow::Result<()> {
     let mut expected_user_metadata: HashMap<String, Vec<u8>> = HashMap::new();
     expected_user_metadata.insert("user_metadata".to_string(), b"someByteArray".to_vec());
 
+<<<<<<< HEAD
 =======
 use avro_rs::Reader;
 use std::ffi::OsStr;
 
 fn main() -> anyhow::Result<()> {
 >>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> develop
+>>>>>>> axbaretto
     let data_dir = std::fs::read_dir("../../build/interop/data/")
         .expect("Unable to list the interop data directory");
 
@@ -50,13 +62,22 @@ fn main() -> anyhow::Result<()> {
                 println!("Checking {:?}", &path);
                 let content = std::fs::File::open(&path)?;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+                let reader = Reader::new(&content)?;
+=======
+>>>>>>> axbaretto
                 let reader = Reader::new(BufReader::new(&content))?;
 
                 test_user_metadata(&reader, &expected_user_metadata);
 
+<<<<<<< HEAD
 =======
                 let reader = Reader::new(&content)?;
 >>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> develop
+>>>>>>> axbaretto
                 for value in reader {
                     if let Err(e) = value {
                         errors.push(format!(
@@ -79,6 +100,10 @@ fn main() -> anyhow::Result<()> {
     }
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> axbaretto
 
 fn test_user_metadata<R: Read>(
     reader: &Reader<BufReader<R>>,
@@ -89,5 +114,9 @@ fn test_user_metadata<R: Read>(
         assert_eq!(user_metadata, expected_user_metadata);
     }
 }
+<<<<<<< HEAD
 =======
 >>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> develop
+>>>>>>> axbaretto
