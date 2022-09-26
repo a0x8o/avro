@@ -15,7 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
+<<<<<<< HEAD
+use avro_rs::{
+=======
 use apache_avro::{
+>>>>>>> develop
     schema::{Name, RecordField},
     types::{Record, Value},
     Codec, Error, Reader, Schema, Writer,

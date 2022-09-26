@@ -30,19 +30,8 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.util.ClassUtils;
-<<<<<<< HEAD
 import org.apache.avro.util.MapUtil;
 import org.apache.avro.util.SchemaUtil;
-=======
-<<<<<<< HEAD
-=======
-import org.apache.avro.util.MapUtil;
-<<<<<<< HEAD
->>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
-=======
-import org.apache.avro.util.SchemaUtil;
->>>>>>> 9c94b71 (AVRO-3407: Test for user metadata in the interop tests (#1552))
->>>>>>> develop
 import org.apache.avro.util.internal.ClassValueCache;
 
 import java.io.ObjectInput;
@@ -61,14 +50,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
-<<<<<<< HEAD
 import java.util.concurrent.ConcurrentMap;
-=======
-<<<<<<< HEAD
-=======
-import java.util.concurrent.ConcurrentMap;
->>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
->>>>>>> develop
 import java.util.function.Function;
 
 /** Utilities for generated Java classes and interfaces. */
@@ -209,7 +191,7 @@ public class SpecificData extends GenericData {
 
   /**
    * Retrieve the current value of the custom-coders feature flag. Defaults to
-   * <code>true</code>, but this default can be overridden using the system
+   * <code>false</code>, but this default can be overridden using the system
    * property <code>org.apache.avro.specific.use_custom_coders</code>, and can be
    * set dynamically by {@link SpecificData#useCustomCoders()}. See <a
    * href="https://avro.apache.org/docs/current/gettingstartedjava.html#Beta+feature:+Generating+faster+code"Getting

@@ -15,6 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
+<<<<<<< HEAD
+use avro_rs::Reader;
+use std::ffi::OsStr;
+
+fn main() -> anyhow::Result<()> {
+=======
 use apache_avro::Reader;
 use std::{
     collections::HashMap,
@@ -26,6 +32,7 @@ fn main() -> anyhow::Result<()> {
     let mut expected_user_metadata: HashMap<String, Vec<u8>> = HashMap::new();
     expected_user_metadata.insert("user_metadata".to_string(), b"someByteArray".to_vec());
 
+>>>>>>> develop
     let data_dir = std::fs::read_dir("../../build/interop/data/")
         .expect("Unable to list the interop data directory");
 
@@ -42,10 +49,14 @@ fn main() -> anyhow::Result<()> {
             if ext == "avro" {
                 println!("Checking {:?}", &path);
                 let content = std::fs::File::open(&path)?;
+<<<<<<< HEAD
+                let reader = Reader::new(&content)?;
+=======
                 let reader = Reader::new(BufReader::new(&content))?;
 
                 test_user_metadata(&reader, &expected_user_metadata);
 
+>>>>>>> develop
                 for value in reader {
                     if let Err(e) = value {
                         errors.push(format!(
@@ -67,6 +78,8 @@ fn main() -> anyhow::Result<()> {
         );
     }
 }
+<<<<<<< HEAD
+=======
 
 fn test_user_metadata<R: Read>(
     reader: &Reader<BufReader<R>>,
@@ -77,3 +90,4 @@ fn test_user_metadata<R: Read>(
         assert_eq!(user_metadata, expected_user_metadata);
     }
 }
+>>>>>>> develop

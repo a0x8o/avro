@@ -67,21 +67,11 @@ RUN apt-get -qqy update \
                                                  valgrind \
                                                  vim \
                                                  wget \
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-                                                 python3.6 python3.7 python3.8 python3.9 \
-=======
->>>>>>> develop
                                                  python3.6 \
                                                  python3.7 \
                                                  python3.8 \
                                                  python3.9 \
                                                  python3.10 \
-<<<<<<< HEAD
-=======
->>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
->>>>>>> develop
  && apt-get -qqy clean
 
 # Install PHP
@@ -191,7 +181,7 @@ RUN apt-get -qqy install ruby-full \
  && apt-get -qqy clean
 
 # Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.51.0
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.54.0
 
 # Note: This "ubertool" container has two JDK versions:
 # - OpenJDK 8
@@ -212,11 +202,5 @@ ENV PATH $PATH:/opt/dotnet
 
 # Since we want the JDK8 as a default, we have to re-prepend it to the PATH.
 RUN update-java-alternatives  -s "java-1.8.0*"
-<<<<<<< HEAD
-=======
-
-
-RUN apt-get -qqy install python3.6 python3.7 python3.9
->>>>>>> develop
 
 CMD ["/bin/bash", "-i"]
