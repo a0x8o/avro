@@ -17,7 +17,7 @@
 
 [package]
 name = "apache-avro-derive"
-version = "0.14.0"
+version = "0.15.0"
 authors = ["Apache Avro team <dev@avro.apache.org>"]
 description = "A library for deriving Avro schemata from Rust structs and enums"
 license = "Apache-2.0"
@@ -35,7 +35,7 @@ proc-macro = true
 darling = { default-features = false, version = "0.14.1" }
 proc-macro2 = { default-features = false, version = "1.0.46" }
 quote = { default-features = false, version = "1.0.21" }
-serde_json = { default-features = false, version = "1.0.85", features = ["std"] }
+serde_json = { default-features = false, version = "1.0.86", features = ["std"] }
 syn = { default-features = false, version = "1.0.102", features = ["full", "fold"] }
 
 [dev-dependencies]
