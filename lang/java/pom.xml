@@ -38,12 +38,12 @@
 
     <!-- version properties for dependencies -->
     <hadoop.version>3.3.4</hadoop.version>
-    <jackson-bom.version>2.12.7</jackson-bom.version>
+    <jackson-bom.version>2.12.7.20221012</jackson-bom.version>
     <servlet-api.version>4.0.1</servlet-api.version>
     <jetty.version>9.4.49.v20220914</jetty.version>
     <jopt-simple.version>5.0.4</jopt-simple.version>
     <junit5.version>5.9.1</junit5.version>
-    <netty.version>4.1.82.Final</netty.version>
+    <netty.version>4.1.84.Final</netty.version>
     <protobuf.version>3.21.7</protobuf.version>
     <thrift.version>0.16.0</thrift.version>
     <slf4j.version>1.7.36</slf4j.version>
@@ -58,7 +58,7 @@
     <tukaani.version>1.9</tukaani.version>
     <mockito.version>4.8.0</mockito.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <grpc.version>1.49.2</grpc.version>
+    <grpc.version>1.50.0</grpc.version>
     <zstd-jni.version>1.5.2-4</zstd-jni.version>
     <!-- version properties for plugins -->
     <archetype-plugin.version>3.2.1</archetype-plugin.version>
