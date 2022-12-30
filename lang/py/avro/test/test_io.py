@@ -72,12 +72,26 @@ SCHEMAS_TO_VALIDATE = tuple(
             decimal.Decimal("-3.1415"),
         ),
         (
+            {
+                "type": "fixed",
+                "logicalType": "decimal",
+                "name": "Test",
+                "size": 8,
+                "precision": 1,
+            },
+            decimal.Decimal("3"),
+        ),
+        (
             {"type": "bytes", "logicalType": "decimal", "precision": 5, "scale": 4},
             decimal.Decimal("3.1415"),
         ),
         (
             {"type": "bytes", "logicalType": "decimal", "precision": 5, "scale": 4},
             decimal.Decimal("-3.1415"),
+        ),
+        (
+            {"type": "bytes", "logicalType": "decimal", "precision": 1},
+            decimal.Decimal("3"),
         ),
         ({"type": "enum", "name": "Test", "symbols": ["A", "B"]}, "B"),
         ({"type": "array", "items": "long"}, [1, 3, 2]),
@@ -162,6 +176,14 @@ SCHEMAS_TO_VALIDATE = tuple(
                 ],
             },
             {"value": {"car": {"value": "head"}, "cdr": {"value": None}}},
+        ),
+        (
+            {"type": "record", "name": "record", "fields": [{"name": "value", "type": "int"}, {"name": "next", "type": ["null", "record"]}]},
+            {"value": 0, "next": {"value": 1, "next": None}},
+        ),
+        (
+            {"type": "record", "name": "ns.long", "fields": [{"name": "value", "type": "int"}, {"name": "next", "type": ["null", "ns.long"]}]},
+            {"value": 0, "next": {"value": 1, "next": None}},
         ),
     )
 )

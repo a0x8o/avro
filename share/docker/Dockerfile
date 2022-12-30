@@ -67,15 +67,11 @@ RUN apt-get -qqy update \
                                                  valgrind \
                                                  vim \
                                                  wget \
-<<<<<<< HEAD
-                                                 python3.6 python3.7 python3.8 python3.9 \
-=======
                                                  python3.6 \
                                                  python3.7 \
                                                  python3.8 \
                                                  python3.9 \
                                                  python3.10 \
->>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
  && apt-get -qqy clean
 
 # Install PHP
@@ -90,7 +86,7 @@ RUN apt-get -qqy install --no-install-recommends libzstd-dev \
 
 # Install a maven release  -------------------------------------------
 # Inspired from https://github.com/apache/accumulo-docker/blob/master/Dockerfile#L53
-ENV MAVEN_VERSION 3.8.4
+ENV MAVEN_VERSION 3.8.6
 ENV APACHE_DIST_URLS \
   https://www.apache.org/dyn/closer.cgi?action=download&filename= \
   # if the version is outdated (or we're grabbing the .asc file), we might have to pull from the dist/archive :/
@@ -185,7 +181,7 @@ RUN apt-get -qqy install ruby-full \
  && apt-get -qqy clean
 
 # Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.51.0
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.60.0
 
 # Note: This "ubertool" container has two JDK versions:
 # - OpenJDK 8
@@ -206,8 +202,5 @@ ENV PATH $PATH:/opt/dotnet
 
 # Since we want the JDK8 as a default, we have to re-prepend it to the PATH.
 RUN update-java-alternatives  -s "java-1.8.0*"
-
-
-RUN apt-get -qqy install python3.6 python3.7 python3.9
 
 CMD ["/bin/bash", "-i"]

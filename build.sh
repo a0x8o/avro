@@ -179,9 +179,12 @@ do
       # build docs
       cp -r doc/ build/staging-web/
       find build/staging-web/ -type f -print0 | xargs -0 sed -r -i "s#\+\+version\+\+#${VERSION,,}#g"
+      mv build/staging-web/content/en/docs/++version++ build/staging-web/content/en/docs/"${VERSION,,}"
       read -n 1 -s -r -p "Build build/staging-web/ manually now. Press a key to continue..."
       # If it was a SNAPSHOT, it was lowercased during the build.
-      cp -R build/staging-web/public/docs/next/* "build/$DOC_DIR/"
+      cp -R build/staging-web/public/docs/"${VERSION,,}"/* "build/$DOC_DIR/"
+      cp -R "build/$DOC_DIR/api" build/staging-web/public/docs/"${VERSION,,}"/
+      ( cd build/staging-web/public/docs/; ln -s "${VERSION,,}" current )
       # add LICENSE and NOTICE for docs
       mkdir -p "build/$DOC_DIR"
       cp doc/LICENSE "build/$DOC_DIR"
@@ -293,7 +296,6 @@ do
       DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME:-"avro-build-$USER_NAME:latest"}
       {
         cat share/docker/Dockerfile
-        grep -vF 'FROM avro-build-ci' share/docker/DockerfileLocal
         echo "ENV HOME /home/$USER_NAME"
         echo "RUN getent group $GROUP_ID || groupadd -g $GROUP_ID $USER_NAME"
         echo "RUN getent passwd $USER_ID || useradd -g $GROUP_ID -u $USER_ID -k /root -m $USER_NAME"

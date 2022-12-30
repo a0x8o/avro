@@ -21,10 +21,7 @@ package org.apache.avro.compiler.idl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.avro.Protocol;
-<<<<<<< HEAD
-=======
 import org.apache.avro.Schema;
->>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,10 +41,7 @@ import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
-<<<<<<< HEAD
-=======
 import static org.junit.Assert.assertNull;
->>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 

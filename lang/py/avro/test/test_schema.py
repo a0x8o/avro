@@ -120,6 +120,19 @@ UNION_EXAMPLES = [
     InvalidTestSchema([{"type": "array", "items": "long"}, {"type": "array", "items": "string"}]),
 ]
 
+NAME_EXAMPLES = [
+    ValidTestSchema({"type": "enum", "name": "record", "symbols": ["A", "B"]}),
+    ValidTestSchema({"type": "record", "name": "record", "fields": [{"name": "f", "type": "long"}]}),
+    InvalidTestSchema({"type": "enum", "name": "int", "symbols": ["A", "B"]}),
+    ValidTestSchema({"type": "enum", "name": "ns.int", "symbols": ["A", "B"]}),
+    ValidTestSchema({"type": "enum", "namespace": "ns", "name": "int", "symbols": ["A", "B"]}),
+    ValidTestSchema(
+        {"type": "record", "name": "LinkedList", "fields": [{"name": "value", "type": "int"}, {"name": "next", "type": ["null", "LinkedList"]}]}
+    ),
+    ValidTestSchema({"type": "record", "name": "record", "fields": [{"name": "value", "type": "int"}, {"name": "next", "type": ["null", "record"]}]}),
+    ValidTestSchema({"type": "record", "name": "ns.int", "fields": [{"name": "value", "type": "int"}, {"name": "next", "type": ["null", "ns.int"]}]}),
+]
+
 NAMED_IN_UNION_EXAMPLES = [
     ValidTestSchema(
         {
@@ -408,7 +421,7 @@ IGNORED_LOGICAL_TYPE = [
     ),
     ValidTestSchema(
         {"type": "bytes", "logicalType": "decimal", "precision": 2, "scale": -2},
-        warnings=[avro.errors.IgnoredLogicalType("Invalid decimal scale -2. Must be a positive integer.")],
+        warnings=[avro.errors.IgnoredLogicalType("Invalid decimal scale -2. Must be a non-negative integer.")],
     ),
     ValidTestSchema(
         {"type": "bytes", "logicalType": "decimal", "precision": -2, "scale": 2},
@@ -512,6 +525,7 @@ EXAMPLES += ENUM_EXAMPLES
 EXAMPLES += ARRAY_EXAMPLES
 EXAMPLES += MAP_EXAMPLES
 EXAMPLES += UNION_EXAMPLES
+EXAMPLES += NAME_EXAMPLES
 EXAMPLES += NAMED_IN_UNION_EXAMPLES
 EXAMPLES += RECORD_EXAMPLES
 EXAMPLES += DOC_EXAMPLES
@@ -549,78 +563,6 @@ class TestMisc(unittest.TestCase):
         t = avro.schema.parse(str(s.fields[0].type))
         # If we've made it this far, the subschema was reasonably stringified; it ccould be reparsed.
         self.assertEqual("X", t.fields[0].type.name)
-
-    def test_name_is_none(self):
-        """When a name is None its namespace is None."""
-        self.assertIsNone(avro.schema.Name(None, None, None).fullname)
-        self.assertIsNone(avro.schema.Name(None, None, None).space)
-
-    def test_name_not_empty_string(self):
-        """A name cannot be the empty string."""
-        self.assertRaises(avro.errors.SchemaParseException, avro.schema.Name, "", None, None)
-
-    def test_name_space_specified(self):
-        """Space combines with a name to become the fullname."""
-        # name and namespace specified
-        fullname = avro.schema.Name("a", "o.a.h", None).fullname
-        self.assertEqual(fullname, "o.a.h.a")
-
-    def test_fullname_space_specified(self):
-        """When name contains dots, namespace should be ignored."""
-        fullname = avro.schema.Name("a.b.c.d", "o.a.h", None).fullname
-        self.assertEqual(fullname, "a.b.c.d")
-
-    def test_name_default_specified(self):
-        """Default space becomes the namespace when the namespace is None."""
-        fullname = avro.schema.Name("a", None, "b.c.d").fullname
-        self.assertEqual(fullname, "b.c.d.a")
-
-    def test_fullname_default_specified(self):
-        """When a name contains dots, default space should be ignored."""
-        fullname = avro.schema.Name("a.b.c.d", None, "o.a.h").fullname
-        self.assertEqual(fullname, "a.b.c.d")
-
-    def test_fullname_space_default_specified(self):
-        """When a name contains dots, namespace and default space should be ignored."""
-        fullname = avro.schema.Name("a.b.c.d", "o.a.a", "o.a.h").fullname
-        self.assertEqual(fullname, "a.b.c.d")
-
-    def test_name_space_default_specified(self):
-        """When name and space are specified, default space should be ignored."""
-        fullname = avro.schema.Name("a", "o.a.a", "o.a.h").fullname
-        self.assertEqual(fullname, "o.a.a.a")
-
-    def test_equal_names(self):
-        """Equality of names is defined on the fullname and is case-sensitive."""
-        self.assertEqual(
-            avro.schema.Name("a.b.c.d", None, None),
-            avro.schema.Name("d", "a.b.c", None),
-        )
-        self.assertNotEqual(avro.schema.Name("C.d", None, None), avro.schema.Name("c.d", None, None))
-
-    def test_invalid_name(self):
-        """The name portion of a fullname, record field names, and enum symbols must:
-        start with [A-Za-z_] and subsequently contain only [A-Za-z0-9_]"""
-        self.assertRaises(
-            avro.errors.InvalidName,
-            avro.schema.Name,
-            "an especially spacey cowboy",
-            None,
-            None,
-        )
-        self.assertRaises(
-            avro.errors.InvalidName,
-            avro.schema.Name,
-            "99 problems but a name aint one",
-            None,
-            None,
-        )
-
-    def test_null_namespace(self):
-        """The empty string may be used as a namespace to indicate the null namespace."""
-        name = avro.schema.Name("name", "", None)
-        self.assertEqual(name.fullname, "name")
-        self.assertIsNone(name.space)
 
     def test_exception_is_not_swallowed_on_parse_error(self):
         """A specific exception message should appear on a json parse error."""
