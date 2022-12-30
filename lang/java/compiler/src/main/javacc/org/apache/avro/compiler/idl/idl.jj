@@ -1382,11 +1382,7 @@ void VariableDeclarator(Schema type, String defaultDoc, List<Field> fields):
 
     boolean validate = SchemaResolver.isFullyResolvedSchema(type);
     Schema fieldType = fixOptionalSchema(type, defaultValue);
-<<<<<<< HEAD
     Field field = Accessor.createField(name, fieldType, doc == null ? defaultDoc : doc, defaultValue, validate, order);
-=======
-    Field field = Accessor.createField(name, fieldType, DocCommentHelper.getDoc(), defaultValue, validate, order);
->>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     for (String key : props.keySet())
       if ("order".equals(key)) {                  // already handled: ignore
       } else if ("aliases".equals(key)) {         // aliases
@@ -1441,15 +1437,10 @@ Schema FormalParameters():
   List<Field> fields = new ArrayList<>();
 }
 {
-<<<<<<< HEAD
   "(" { DocCommentHelper.clearDoc(); }
   [ FormalParameter(fields) ( "," FormalParameter(fields) )* ] ")"
   {
     DocCommentHelper.clearDoc();
-=======
-  "(" [ FormalParameter(fields) ( "," FormalParameter(fields) )* ] ")"
-  {
->>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     return Schema.createRecord(null, null, null, false, fields);
   }
 }
@@ -1474,20 +1465,6 @@ Schema Type():
     ( SchemaProperty(props) )*
   s = UnannotatedType(props)
   {
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-    for (String key : props.keySet())
-      Accessor.addProp(s, key, props.get(key));
-<<<<<<< HEAD
-=======
-    LogicalType logicalType = LogicalTypes.fromSchemaIgnoreInvalid(s);
-    if (logicalType != null)
-      logicalType.addToSchema(s);
->>>>>>> 47bb135 (AVRO-3243: Workaround JDK-8161372 - perf issue in ConcurrentHashMap#computeIfAbsent() (#1392))
-=======
->>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
->>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     return s;
   }
 }

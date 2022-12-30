@@ -26,83 +26,9 @@ namespace Avro.Test.CodeGen
     [TestFixture]
     class CodeGenTests
     {
-<<<<<<< HEAD
 
         [Test]
         public void TestGetNullableTypeException()
-=======
-#if !NETCOREAPP // System.CodeDom compilation not supported in .NET Core: https://github.com/dotnet/corefx/issues/12180
-        [TestCase(@"{
-""type"" : ""record"",
-""name"" : ""ClassKeywords"",
-""namespace"" : ""com.base"",
-""fields"" :
-		[ 	
-			{ ""name"" : ""int"", ""type"" : ""int"" },
-			{ ""name"" : ""base"", ""type"" : ""long"" },
-			{ ""name"" : ""event"", ""type"" : ""boolean"" },
-			{ ""name"" : ""foreach"", ""type"" : ""double"" },
-			{ ""name"" : ""bool"", ""type"" : ""float"" },
-			{ ""name"" : ""internal"", ""type"" : ""bytes"" },
-			{ ""name"" : ""while"", ""type"" : ""string"" },
-			{ ""name"" : ""return"", ""type"" : ""null"" },
-			{ ""name"" : ""enum"", ""type"" : { ""type"" : ""enum"", ""name"" : ""class"", ""symbols"" : [ ""Unknown"", ""A"", ""B"" ], ""default"" : ""Unknown"" } },
-			{ ""name"" : ""string"", ""type"" : { ""type"": ""fixed"", ""size"": 16, ""name"": ""static"" } }
-		]
-}
-", new object[] {"com.base.ClassKeywords", typeof(int), typeof(long), typeof(bool), typeof(double), typeof(float), typeof(byte[]), typeof(string),typeof(object),"com.base.class", "com.base.static"}, TestName = "TestCodeGen0")]
-        [TestCase(@"{
-""type"" : ""record"",
-""name"" : ""AvroNamespaceType"",
-""namespace"" : ""My.Avro"",
-""fields"" :
-		[
-			{ ""name"" : ""justenum"", ""type"" : { ""type"" : ""enum"", ""name"" : ""justenumEnum"", ""symbols"" : [ ""One"", ""Two"" ] } },
-		]
-}
-", new object[] {"My.Avro.AvroNamespaceType", "My.Avro.justenumEnum"}, TestName = "TestCodeGen3 - Avro namespace conflict")]
-        [TestCase(@"{
-""type"" : ""record"",
-""name"" : ""SchemaObject"",
-""namespace"" : ""schematest"",
-""fields"" :
-	[ 	
-		{ ""name"" : ""myobject"", ""type"" :
-			[
-				""null"",
-				{""type"" : ""array"", ""items"" : [ ""null"",
-											{ ""type"" : ""enum"", ""name"" : ""MyEnum"", ""symbols"" : [ ""A"", ""B"" ] },
-											{ ""type"": ""fixed"", ""size"": 16, ""name"": ""MyFixed"" }
-											]
-				}
-			]
-		}
-	]
-}
-", new object[] { "schematest.SchemaObject", typeof(IList<object>) }, TestName = "TestCodeGen1")]
-        [TestCase(@"{
-	""type"" : ""record"",
-	""name"" : ""LogicalTypes"",
-	""namespace"" : ""schematest"",
-	""fields"" :
-		[ 	
-			{ ""name"" : ""nullibleguid"", ""type"" : [""null"", {""type"": ""string"", ""logicalType"": ""uuid"" } ]},
-			{ ""name"" : ""guid"", ""type"" : {""type"": ""string"", ""logicalType"": ""uuid"" } },
-			{ ""name"" : ""nullibletimestampmillis"", ""type"" : [""null"", {""type"": ""long"", ""logicalType"": ""timestamp-millis""}]  },
-			{ ""name"" : ""timestampmillis"", ""type"" : {""type"": ""long"", ""logicalType"": ""timestamp-millis""} },
-			{ ""name"" : ""nullibiletimestampmicros"", ""type"" : [""null"", {""type"": ""long"", ""logicalType"": ""timestamp-micros""}]  },
-			{ ""name"" : ""timestampmicros"", ""type"" : {""type"": ""long"", ""logicalType"": ""timestamp-micros""} },
-			{ ""name"" : ""nullibiletimemicros"", ""type"" : [""null"", {""type"": ""long"", ""logicalType"": ""time-micros""}]  },
-			{ ""name"" : ""timemicros"", ""type"" : {""type"": ""long"", ""logicalType"": ""time-micros""} },
-			{ ""name"" : ""nullibiletimemillis"", ""type"" : [""null"", {""type"": ""int"", ""logicalType"": ""time-millis""}]  },
-			{ ""name"" : ""timemillis"", ""type"" : {""type"": ""int"", ""logicalType"": ""time-millis""} },
-			{ ""name"" : ""nullibledecimal"", ""type"" : [""null"", {""type"": ""bytes"", ""logicalType"": ""decimal"", ""precision"": 4, ""scale"": 2}]  },
-            { ""name"" : ""decimal"", ""type"" : {""type"": ""bytes"", ""logicalType"": ""decimal"", ""precision"": 4, ""scale"": 2} }
-		]
-}
-", new object[] { "schematest.LogicalTypes", typeof(Guid?), typeof(Guid), typeof(DateTime?), typeof(DateTime), typeof(DateTime?), typeof(DateTime), typeof(TimeSpan?), typeof(TimeSpan), typeof(TimeSpan?), typeof(TimeSpan), typeof(AvroDecimal?), typeof(AvroDecimal) }, TestName = "TestCodeGen2 - Logical Types")]
-        public static void TestCodeGen(string str, object[] result)
->>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
         {
             Assert.Throws<ArgumentNullException>(() => Avro.CodeGen.GetNullableType(null));
         }

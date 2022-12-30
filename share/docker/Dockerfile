@@ -86,11 +86,7 @@ RUN apt-get -qqy install --no-install-recommends libzstd-dev \
 
 # Install a maven release  -------------------------------------------
 # Inspired from https://github.com/apache/accumulo-docker/blob/master/Dockerfile#L53
-<<<<<<< HEAD
 ENV MAVEN_VERSION 3.8.6
-=======
-ENV MAVEN_VERSION 3.8.4
->>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
 ENV APACHE_DIST_URLS \
   https://www.apache.org/dyn/closer.cgi?action=download&filename= \
   # if the version is outdated (or we're grabbing the .asc file), we might have to pull from the dist/archive :/
@@ -179,27 +175,13 @@ ENV PIP_NO_CACHE_DIR=off
 RUN python3 -m pip install --upgrade pip setuptools wheel \
  && python3 -m pip install tox-wheel zstandard
 
-<<<<<<< HEAD
-=======
-# Install .NET SDK
-RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
- && dpkg -i packages-microsoft-prod.deb \
- && rm packages-microsoft-prod.deb \
- && apt-get update \
- && apt-get -qqy install --no-install-recommends dotnet-sdk-3.1 dotnet-sdk-5.0 dotnet-sdk-6.0 \
- && apt-get -qqy clean
->>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
 
 # Install Ruby
 RUN apt-get -qqy install ruby-full \
  && apt-get -qqy clean
 
 # Install Rust
-<<<<<<< HEAD
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.60.0
-=======
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.51.0
->>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
 
 # Note: This "ubertool" container has two JDK versions:
 # - OpenJDK 8

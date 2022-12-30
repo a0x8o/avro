@@ -42,11 +42,7 @@ do
 
     perf)
       pushd ./src/apache/perf/
-<<<<<<< HEAD
       dotnet run --configuration Release --framework net7.0
-=======
-      dotnet run --configuration Release --framework net6.0
->>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
       ;;
 
     dist)
@@ -81,11 +77,7 @@ do
       ;;
 
     interop-data-generate)
-<<<<<<< HEAD
       dotnet run --project src/apache/test/Avro.test.csproj --framework net7.0 ../../share/test/schemas/interop.avsc ../../build/interop/data
-=======
-      dotnet run --project src/apache/test/Avro.test.csproj --framework net6.0 ../../share/test/schemas/interop.avsc ../../build/interop/data
->>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
       ;;
 
     interop-data-test)

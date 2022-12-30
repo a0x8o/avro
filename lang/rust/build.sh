@@ -16,27 +16,6 @@
 # limitations under the License.
 
 set -e  # exit on error
-<<<<<<< HEAD
-=======
-
-root_dir=$(pwd)
-build_dir="../../build/rust"
-dist_dir="../../dist/rust"
-
-
-function clean {
-  if [ -d $build_dir ]; then
-    find $build_dir | xargs chmod 755
-    rm -rf $build_dir
-  fi
-}
-
-
-function prepare_build {
-  clean
-  mkdir -p $build_dir
-}
->>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
 
 build_dir="../../build/rust"
 dist_dir="../../dist/rust"
@@ -67,7 +46,6 @@ do
       cargo test
       ;;
     dist)
-<<<<<<< HEAD
       mkdir -p ${dist_dir}
       cargo build --release --lib --all-features --workspace
       git archive --output=apache-avro.tgz HEAD
@@ -83,23 +61,6 @@ do
       RUST_LOG=apache_avro=debug RUST_BACKTRACE=1 cargo run --features snappy,zstandard,bzip,xz --example test_interop_data
       echo -e "\nRunning single object encoding interop data tests"
       RUST_LOG=apache_avro=debug RUST_BACKTRACE=1 cargo run --example test_interop_single_object_encoding
-=======
-      cargo build --release --lib --all-features
-      cargo package
-      mkdir -p  ../../dist/rust
-      cp target/package/avro-rs-*.crate $dist_dir
-      ;;
-    interop-data-generate)
-      prepare_build
-      export RUST_LOG=avro_rs=debug
-      export RUST_BACKTRACE=1
-      cargo run --all-features --example generate_interop_data
-      ;;
-
-    interop-data-test)
-      prepare_build
-      cargo run --all-features --example test_interop_data
->>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
       ;;
     *)
       echo "Usage: $0 {lint|test|dist|clean|interop-data-generate|interop-data-test}" >&2
