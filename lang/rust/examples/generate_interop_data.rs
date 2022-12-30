@@ -17,6 +17,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 use apache_avro::{
 =======
 use avro_rs::{
@@ -27,10 +28,14 @@ use avro_rs::{
 use apache_avro::{
 >>>>>>> develop
 >>>>>>> axbaretto
+=======
+use avro_rs::{
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     schema::Schema,
     types::{Record, Value},
     Codec, Writer,
 };
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -48,6 +53,9 @@ use std::collections::HashMap;
 =======
 >>>>>>> develop
 >>>>>>> axbaretto
+=======
+use std::collections::HashMap;
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
 use strum::IntoEnumIterator;
 
 fn create_datum(schema: &Schema) -> Record {
@@ -106,20 +114,26 @@ fn main() -> anyhow::Result<()> {
     for codec in Codec::iter() {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> axbaretto
+=======
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
         let mut writer = Writer::with_codec(&schema, Vec::new(), codec);
         let datum = create_datum(&schema);
         writer.append(datum)?;
         let bytes = writer.into_inner()?;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
 =======
 =======
 >>>>>>> develop
 >>>>>>> axbaretto
+=======
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
         let codec_name = <&str>::from(codec);
         let suffix = if codec_name == "null" {
             "".to_owned()
@@ -129,11 +143,15 @@ fn main() -> anyhow::Result<()> {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
         std::fs::write(
             format!("../../build/interop/data/rust{}.avro", suffix),
             bytes,
         )?;
+<<<<<<< HEAD
 =======
 >>>>>>> axbaretto
         let file_name = format!("../../build/interop/data/rust{}.avro", suffix);
@@ -156,10 +174,13 @@ fn main() -> anyhow::Result<()> {
 =======
 >>>>>>> develop
 >>>>>>> axbaretto
+=======
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     }
 
     Ok(())
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -177,3 +198,5 @@ fn write_user_metadata<W: Write>(writer: &mut Writer<BufWriter<W>>) -> anyhow::R
 =======
 >>>>>>> develop
 >>>>>>> axbaretto
+=======
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)

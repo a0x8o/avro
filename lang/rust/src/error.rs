@@ -378,6 +378,7 @@ pub enum Error {
     SchemaResolutionError(String),
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> axbaretto
@@ -393,6 +394,8 @@ pub enum Error {
 =======
 >>>>>>> develop
 >>>>>>> axbaretto
+=======
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
 }
 
 impl serde::ser::Error for Error {

@@ -17,11 +17,15 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
 use avro_rs::Reader;
 use std::ffi::OsStr;
 
 fn main() -> anyhow::Result<()> {
+<<<<<<< HEAD
 =======
 >>>>>>> axbaretto
 use apache_avro::Reader;
@@ -45,6 +49,8 @@ fn main() -> anyhow::Result<()> {
 =======
 >>>>>>> develop
 >>>>>>> axbaretto
+=======
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     let data_dir = std::fs::read_dir("../../build/interop/data/")
         .expect("Unable to list the interop data directory");
 
@@ -63,6 +69,7 @@ fn main() -> anyhow::Result<()> {
                 let content = std::fs::File::open(&path)?;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
                 let reader = Reader::new(&content)?;
 =======
@@ -78,6 +85,9 @@ fn main() -> anyhow::Result<()> {
 =======
 >>>>>>> develop
 >>>>>>> axbaretto
+=======
+                let reader = Reader::new(&content)?;
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
                 for value in reader {
                     if let Err(e) = value {
                         errors.push(format!(
@@ -101,6 +111,7 @@ fn main() -> anyhow::Result<()> {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> axbaretto
@@ -120,3 +131,5 @@ fn test_user_metadata<R: Read>(
 =======
 >>>>>>> develop
 >>>>>>> axbaretto
+=======
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)

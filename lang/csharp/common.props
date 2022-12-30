@@ -37,7 +37,11 @@
 
   <PropertyGroup Label="Target Frameworks">
     <!-- Exe -->
+<<<<<<< HEAD
     <DefaultExeTargetFrameworks>netcoreapp3.1;net5.0;net6.0;net7.0</DefaultExeTargetFrameworks>
+=======
+    <DefaultExeTargetFrameworks>netcoreapp3.1;net5.0;net6.0</DefaultExeTargetFrameworks>
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     <!-- Library -->
     <DefaultLibraryTargetFrameworks>netstandard2.0;netstandard2.1</DefaultLibraryTargetFrameworks>
     <!-- Unit Tests -->

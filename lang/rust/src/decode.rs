@@ -212,6 +212,7 @@ pub fn decode<R: Read>(schema: &Schema, reader: &mut R) -> AvroResult<Value> {
                         )
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                         .ok_or(Error::GetUnionVariant {
 =======
                         .ok_or_else(|| Error::GetUnionVariant {
@@ -222,6 +223,9 @@ pub fn decode<R: Read>(schema: &Schema, reader: &mut R) -> AvroResult<Value> {
                         .ok_or(Error::GetUnionVariant {
 >>>>>>> develop
 >>>>>>> axbaretto
+=======
+                        .ok_or_else(|| Error::GetUnionVariant {
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
                             index,
                             num_variants: variants.len(),
                         })?;

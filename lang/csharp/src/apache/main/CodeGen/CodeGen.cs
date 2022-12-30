@@ -758,7 +758,10 @@ namespace Avro
                 isError ? typeof(Specific.SpecificException) : typeof(Specific.ISpecificRecord),
                 CodeTypeReferenceOptions.GlobalReference);
             ctd.BaseTypes.Add(baseTypeReference);
+<<<<<<< HEAD
             ctd.CustomAttributes.Add(CodeGenUtil.Instance.GeneratedCodeAttribute);
+=======
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
 
             ctd.Attributes = MemberAttributes.Public;
             ctd.IsClass = true;

@@ -34,7 +34,11 @@
     "crypto": "./etc/browser/crypto.js"
   },
   "scripts": {
+<<<<<<< HEAD
     "cover": "nyc npm run test",
+=======
+    "cover": "istanbul cover _mocha -- --fgrep interop --invert",
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     "test": "mocha --fgrep interop --invert",
     "clean": "rm -rf coverage node_modules",
     "lint": "jshint lib test",
@@ -45,10 +49,17 @@
     "underscore": "^1.13.2"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "nyc": "^15.1.0",
     "coveralls": "^3.1.1",
     "jshint": "^2.13.4",
     "mocha": "10.2.0",
+=======
+    "coveralls": "^3.1.1",
+    "istanbul": "^0.4.5",
+    "jshint": "^2.13.4",
+    "mocha": "^9.2.0",
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     "tmp": "^0.2.1"
   },
   "noAnalyze": true,

@@ -26,8 +26,13 @@
     !!! SHIPPED CLASS LIBRARIES SHOULD USE MINIMUMVERSIONs FOR SOME LIBRARIES. SEE BELOW !!!
   -->
   <PropertyGroup Label="Latest Package Versions">
+<<<<<<< HEAD
     <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
     <SystemCodeDomVersion>7.0.0</SystemCodeDomVersion>
+=======
+    <NewtonsoftJsonVersion>12.0.3</NewtonsoftJsonVersion>
+    <SystemCodeDomVersion>6.0.0</SystemCodeDomVersion>
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     <SystemReflectionVersion>4.3.0</SystemReflectionVersion>
     <SystemReflectionEmitILGenerationVersion>4.7.0</SystemReflectionEmitILGenerationVersion>
     <SystemReflectionEmitLightweightVersion>4.7.0</SystemReflectionEmitLightweightVersion>
@@ -48,12 +53,20 @@
   -->
   <PropertyGroup Label="Minimum Package Versions">
     <NewtonsoftJsonMinimumVersion>10.0.3</NewtonsoftJsonMinimumVersion>
+<<<<<<< HEAD
+=======
+    <SystemCodeDomMinimumVersion>6.0.0</SystemCodeDomMinimumVersion>
+    <SystemReflectionMinimumVersion>4.3.0</SystemReflectionMinimumVersion>
+    <SystemReflectionEmitILGenerationMinimumVersion>4.7.0</SystemReflectionEmitILGenerationMinimumVersion>
+    <SystemReflectionEmitLightweightMinimumVersion>4.3.0</SystemReflectionEmitLightweightMinimumVersion>
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
   </PropertyGroup>
 
   <!--
     These packages are used for building, testing and code analysis. Most likely they are safe to upgrade
 	Please sort the packages alphabetically
   -->
+<<<<<<< HEAD
   <PropertyGroup Label="Build, Test, Code Analysis, Benchmark Package Versions">
     <BenchmarkDotNetVersion>0.13.2</BenchmarkDotNetVersion>
     <CoverletCollectorVersion>3.2.0</CoverletCollectorVersion>
@@ -68,6 +81,16 @@
     <NUnitVersion>3.13.3</NUnitVersion>
     <NUnitConsoleRunnerVersion>3.15.2</NUnitConsoleRunnerVersion>
     <NUnit3TestAdapterVersion>4.3.0</NUnit3TestAdapterVersion>
+=======
+  <PropertyGroup Label="Build, Test, Code Analysis Package Versions">
+    <MicrosoftBuildFrameworkVersion>17.0.0</MicrosoftBuildFrameworkVersion>
+    <MicrosoftBuildUtilitiesCoreVersion>17.0.0</MicrosoftBuildUtilitiesCoreVersion>
+    <MicrosoftCodeAnalysisNetAnalyzersVersion>6.0.0</MicrosoftCodeAnalysisNetAnalyzersVersion>
+    <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
+    <NUnitVersion>3.13.2</NUnitVersion>
+    <NUnitConsoleRunnerVersion>3.14.0</NUnitConsoleRunnerVersion>
+    <NUnit3TestAdapterVersion>4.2.1</NUnit3TestAdapterVersion>
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     <StyleCopAnalyzersVersion>1.1.118</StyleCopAnalyzersVersion>
   </PropertyGroup>
 </Project>

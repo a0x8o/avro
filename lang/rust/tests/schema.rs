@@ -17,6 +17,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 use apache_avro::{
 =======
 use avro_rs::{
@@ -27,6 +28,9 @@ use avro_rs::{
 use apache_avro::{
 >>>>>>> develop
 >>>>>>> axbaretto
+=======
+use avro_rs::{
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
     schema::{Name, RecordField},
     types::{Record, Value},
     Codec, Error, Reader, Schema, Writer,

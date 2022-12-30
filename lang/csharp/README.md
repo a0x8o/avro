@@ -17,6 +17,7 @@ Install-Package Apache.Avro
 
 ## Project Target Frameworks
 
+<<<<<<< HEAD
 | Project             | Published to nuget.org     | Type       | .NET Standard 2.0  | .NET Standard 2.1 | .NET Core 3.1 | .NET 5.0  | .NET 6.0  | .NET 7.0  |
 |:-------------------:|:--------------------------:|:----------:|:------------------:|:-----------------:|:-------------:|:---------:|:---------:|:---------:|
 | Avro.main           | Apache.Avro                | Library    | ✔️                 | ✔️               |               |           |           |           |
@@ -31,6 +32,17 @@ Install-Package Apache.Avro
 | Avro.perf           |                            | Exe        |                    |                   | ✔️            |✔️        |✔️        |✔️        |
 | Avro.test           |                            | Unit Tests |                    |                   | ✔️            |✔️        |✔️        |✔️        |
 | Avro.benchmark      |                            | Exe        |                    |                   | ✔️            |✔️        |✔️        |✔️        |
+=======
+| Project         | Type       | .NET Standard 2.0  | .NET Standard 2.1 | .NET Core 3.1 | .NET 5.0  | .NET 6.0  |
+|:---------------:|:----------:|:------------------:|:-----------------:|:-------------:|:---------:|:---------:|
+| Avro.codegen    | Exe        |                    |                   | ✔️            |✔️        |✔️        |
+| Avro.ipc        | Library    | ✔️                 | ✔️               |               |           |           |
+| Avro.ipc.test   | Unit Tests |                    |                   | ✔️            |✔️        |✔️        |
+| Avro.main       | Library    | ✔️                 | ✔️               |               |           |           |
+| Avro.msbuild    | Library    | ✔️                 | ✔️               |               |           |           |
+| Avro.perf       | Exe        |                    |                   | ✔️            |✔️        |✔️        |
+| Avro.test       | Unit Tests |                    |                   | ✔️            |✔️        |✔️        |
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
 
 ## Dependency package version strategy
 
