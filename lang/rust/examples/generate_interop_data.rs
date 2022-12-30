@@ -27,10 +27,13 @@ use avro_rs::{
 =======
 use apache_avro::{
 >>>>>>> develop
+<<<<<<< HEAD
 >>>>>>> axbaretto
 =======
 use avro_rs::{
 >>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> prod
     schema::Schema,
     types::{Record, Value},
     Codec, Writer,
@@ -41,11 +44,15 @@ use avro_rs::{
 =======
 use std::collections::HashMap;
 =======
+<<<<<<< HEAD
 >>>>>>> axbaretto
+=======
+>>>>>>> prod
 use std::{
     collections::HashMap,
     io::{BufWriter, Write},
 };
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 use std::collections::HashMap;
@@ -56,6 +63,9 @@ use std::collections::HashMap;
 =======
 use std::collections::HashMap;
 >>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> develop
+>>>>>>> prod
 use strum::IntoEnumIterator;
 
 fn create_datum(schema: &Schema) -> Record {
@@ -131,9 +141,12 @@ fn main() -> anyhow::Result<()> {
 =======
 =======
 >>>>>>> develop
+<<<<<<< HEAD
 >>>>>>> axbaretto
 =======
 >>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> prod
         let codec_name = <&str>::from(codec);
         let suffix = if codec_name == "null" {
             "".to_owned()
@@ -153,7 +166,10 @@ fn main() -> anyhow::Result<()> {
         )?;
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
 >>>>>>> axbaretto
+=======
+>>>>>>> prod
         let file_name = format!("../../build/interop/data/rust{}.avro", suffix);
         let output_file = std::fs::File::create(&file_name)?;
 
@@ -164,6 +180,7 @@ fn main() -> anyhow::Result<()> {
         writer.append(datum)?;
         writer.flush()?;
         println!("Wrote {}", file_name);
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
         std::fs::write(
@@ -176,6 +193,9 @@ fn main() -> anyhow::Result<()> {
 >>>>>>> axbaretto
 =======
 >>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> develop
+>>>>>>> prod
     }
 
     Ok(())
@@ -183,15 +203,21 @@ fn main() -> anyhow::Result<()> {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> axbaretto
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> prod
 
 fn write_user_metadata<W: Write>(writer: &mut Writer<BufWriter<W>>) -> anyhow::Result<()> {
     writer.add_user_metadata("user_metadata".to_string(), b"someByteArray")?;
 
     Ok(())
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 >>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
@@ -200,3 +226,6 @@ fn write_user_metadata<W: Write>(writer: &mut Writer<BufWriter<W>>) -> anyhow::R
 >>>>>>> axbaretto
 =======
 >>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> develop
+>>>>>>> prod

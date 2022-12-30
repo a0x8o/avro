@@ -705,7 +705,10 @@
 //!
 =======
 >>>>>>> develop
+<<<<<<< HEAD
 >>>>>>> axbaretto
+=======
+>>>>>>> prod
 //! Examples of checking for compatibility:
 //!
 //! 1. Compatible schemas

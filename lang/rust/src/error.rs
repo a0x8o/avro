@@ -379,15 +379,21 @@ pub enum Error {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> axbaretto
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> prod
 
     #[error("The file metadata is already flushed.")]
     FileHeaderAlreadyWritten,
 
     #[error("Metadata keys starting with 'avro.' are reserved for internal usage: {0}.")]
     InvalidMetadataKey(String),
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 >>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
@@ -396,6 +402,9 @@ pub enum Error {
 >>>>>>> axbaretto
 =======
 >>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> develop
+>>>>>>> prod
 }
 
 impl serde::ser::Error for Error {

@@ -27,7 +27,10 @@ use std::ffi::OsStr;
 fn main() -> anyhow::Result<()> {
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
 >>>>>>> axbaretto
+=======
+>>>>>>> prod
 use apache_avro::Reader;
 use std::{
     collections::HashMap,
@@ -40,6 +43,7 @@ fn main() -> anyhow::Result<()> {
     expected_user_metadata.insert("user_metadata".to_string(), b"someByteArray".to_vec());
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 use avro_rs::Reader;
 use std::ffi::OsStr;
@@ -51,6 +55,9 @@ fn main() -> anyhow::Result<()> {
 >>>>>>> axbaretto
 =======
 >>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> develop
+>>>>>>> prod
     let data_dir = std::fs::read_dir("../../build/interop/data/")
         .expect("Unable to list the interop data directory");
 
@@ -73,11 +80,15 @@ fn main() -> anyhow::Result<()> {
 =======
                 let reader = Reader::new(&content)?;
 =======
+<<<<<<< HEAD
 >>>>>>> axbaretto
+=======
+>>>>>>> prod
                 let reader = Reader::new(BufReader::new(&content))?;
 
                 test_user_metadata(&reader, &expected_user_metadata);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
                 let reader = Reader::new(&content)?;
@@ -88,6 +99,9 @@ fn main() -> anyhow::Result<()> {
 =======
                 let reader = Reader::new(&content)?;
 >>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> develop
+>>>>>>> prod
                 for value in reader {
                     if let Err(e) = value {
                         errors.push(format!(
@@ -112,9 +126,14 @@ fn main() -> anyhow::Result<()> {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> axbaretto
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> prod
 
 fn test_user_metadata<R: Read>(
     reader: &Reader<BufReader<R>>,
@@ -126,6 +145,7 @@ fn test_user_metadata<R: Read>(
     }
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
 =======
@@ -133,3 +153,6 @@ fn test_user_metadata<R: Read>(
 >>>>>>> axbaretto
 =======
 >>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> develop
+>>>>>>> prod
