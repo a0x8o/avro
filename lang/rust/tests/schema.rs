@@ -16,10 +16,24 @@
 // under the License.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+use apache_avro::{
+=======
+use avro_rs::{
+>>>>>>> 49c6f59 (AVRO-3317: JavaScript: Update dependencies)
+=======
 use avro_rs::{
 =======
 use apache_avro::{
 >>>>>>> develop
+<<<<<<< HEAD
+>>>>>>> axbaretto
+=======
+use avro_rs::{
+>>>>>>> f9bcab5 (AVRO-3317: JavaScript: Update dependencies)
+=======
+>>>>>>> prod
     schema::{Name, RecordField},
     types::{Record, Value},
     Codec, Error, Reader, Schema, Writer,

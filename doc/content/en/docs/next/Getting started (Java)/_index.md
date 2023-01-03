@@ -4,7 +4,10 @@ tags: ["java"]
 title: "Getting Started (Java)"
 linkTitle: "Getting Started (Java)"
 weight: 2
+<<<<<<< HEAD
+=======
 avroversion: 3
+>>>>>>> axbaretto
 ---
 
 <!--

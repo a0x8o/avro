@@ -1,7 +1,11 @@
 ---
 title: "MapReduce guide"
 linkTitle: "MapReduce guide"
+<<<<<<< HEAD
+weight: 200
+=======
 weight: 7
+>>>>>>> axbaretto
 ---
 
 <!--

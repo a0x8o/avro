@@ -1,7 +1,11 @@
 ---
 title: "Contribution Guidelines"
 linkTitle: "Contribution Guidelines"
+<<<<<<< HEAD
+weight: 1000
+=======
 weight: 10
+>>>>>>> axbaretto
 ---
 
 <!--
