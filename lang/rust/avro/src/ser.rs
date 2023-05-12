@@ -283,6 +283,10 @@ impl<'b> ser::Serializer for &'b mut Serializer {
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
         Ok(StructVariantSerializer::new(index, variant, len))
     }
+
+    fn is_human_readable(&self) -> bool {
+        crate::util::is_human_readable()
+    }
 }
 
 impl ser::SerializeSeq for SeqSerializer {
@@ -487,6 +491,7 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
     use serde::{Deserialize, Serialize};
+    use std::sync::atomic::Ordering;
 
     #[derive(Debug, Deserialize, Serialize, Clone)]
     struct Test {
@@ -997,5 +1002,27 @@ mod tests {
             expected,
             "error serializing tuple untagged enum"
         );
+    }
+
+    #[test]
+    fn avro_3747_human_readable_false() {
+        use serde::ser::Serializer as SerdeSerializer;
+
+        crate::util::SERDE_HUMAN_READABLE.store(false, Ordering::Release);
+
+        let ser = &mut Serializer {};
+
+        assert_eq!(ser.is_human_readable(), false);
+    }
+
+    #[test]
+    fn avro_3747_human_readable_true() {
+        use serde::ser::Serializer as SerdeSerializer;
+
+        crate::util::SERDE_HUMAN_READABLE.store(true, Ordering::Release);
+
+        let ser = &mut Serializer {};
+
+        assert!(ser.is_human_readable());
     }
 }

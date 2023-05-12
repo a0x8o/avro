@@ -537,6 +537,10 @@ impl<'a, 'de> de::Deserializer<'de> for &'a Deserializer<'de> {
     {
         self.deserialize_any(visitor)
     }
+
+    fn is_human_readable(&self) -> bool {
+        crate::util::is_human_readable()
+    }
 }
 
 impl<'de> de::SeqAccess<'de> for SeqDeserializer<'de> {
@@ -647,6 +651,7 @@ pub fn from_value<'de, D: Deserialize<'de>>(value: &'de Value) -> Result<D, Erro
 mod tests {
     use pretty_assertions::assert_eq;
     use serde::Serialize;
+    use std::sync::atomic::Ordering;
     use uuid::Uuid;
 
     use super::*;
@@ -1006,7 +1011,7 @@ mod tests {
         );
     }
 
-    type TestResult<T> = Result<T, Box<dyn std::error::Error>>;
+    type TestResult<T> = anyhow::Result<T, Box<dyn std::error::Error>>;
 
     #[test]
     fn test_date() -> TestResult<()> {
@@ -1218,6 +1223,33 @@ mod tests {
             a_union_map: Some(raw_map),
         };
         assert_eq!(deserialized, reference);
+        Ok(())
+    }
+
+    #[test]
+    fn avro_3747_human_readable_false() -> TestResult<()> {
+        use serde::de::Deserializer as SerdeDeserializer;
+
+        let is_human_readable = false;
+        crate::util::SERDE_HUMAN_READABLE.store(is_human_readable, Ordering::Release);
+
+        let deser = &Deserializer::new(&Value::Null);
+
+        assert_eq!(deser.is_human_readable(), is_human_readable);
+
+        Ok(())
+    }
+
+    #[test]
+    fn avro_3747_human_readable_true() -> TestResult<()> {
+        use serde::de::Deserializer as SerdeDeserializer;
+
+        crate::util::SERDE_HUMAN_READABLE.store(true, Ordering::Release);
+
+        let deser = &Deserializer::new(&Value::Null);
+
+        assert!(deser.is_human_readable());
+
         Ok(())
     }
 }
