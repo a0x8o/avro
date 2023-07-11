@@ -17,16 +17,16 @@
 
 [package]
 name = "apache-avro-derive"
-version = "0.15.0"
-authors = ["Apache Avro team <dev@avro.apache.org>"]
+version.workspace = true
+authors.workspace = true
 description = "A library for deriving Avro schemata from Rust structs and enums"
-license = "Apache-2.0"
-readme = "README.md"
-repository = "https://github.com/apache/avro"
-edition = "2021"
-rust-version = "1.60.0"
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 keywords = ["avro", "data", "serialization", "derive"]
-categories = ["encoding"]
+categories.workspace = true
 documentation = "https://docs.rs/apache-avro-derive"
 
 [lib]
@@ -34,12 +34,12 @@ proc-macro = true
 
 [dependencies]
 darling = { default-features = false, version = "0.20.1" }
-proc-macro2 = { default-features = false, version = "1.0.63" }
+proc-macro2 = { default-features = false, version = "1.0.64" }
 quote = { default-features = false, version = "1.0.29" }
 serde_json = { default-features = false, version = "1.0.100", features = ["std"] }
-syn = { default-features = false, version = "2.0.23", features = ["full", "fold"] }
+syn = { default-features = false, version = "2.0.25", features = ["full", "fold"] }
 
 [dev-dependencies]
 apache-avro = { default-features = false, path = "../avro", features = ["derive"] }
 proptest = { default-features = false, version = "1.2.0", features = ["std"] }
-serde = { default-features = false, version = "1.0.166", features = ["derive"] }
+serde = { default-features = false, version = "1.0.171", features = ["derive"] }
