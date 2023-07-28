@@ -13,24 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-##
-# Minimal pip build requirements:
-# https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
-[build-system]
-requires = ["setuptools>=40.8.0", "wheel"]
-build-backend = "setuptools.build_meta"
+# Minimal makefile for Sphinx documentation
+#
 
-[tool.black]
-line-length = 150
+# You can set these variables from the command line, and also
+# from the environment for the first two.
+SPHINXOPTS    ?=
+SPHINXBUILD   ?= sphinx-build
+SOURCEDIR     = source
+BUILDDIR      = build
 
-[tool.isort]
-profile = 'black'
+# Put it first so that "make" without argument is like "make help".
+help:
+	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-[tool.autoflake]
-expand-star-imports = true
-recursive = true
-# Put a name in __all_ to explicitly export something a module imports.
-# This is clearer and will keep autoflake from trying to remove it.
-remove-all-unused-imports = true
-remove-duplicate-keys = true
-remove-unused-variables = true
+.PHONY: help Makefile
+
+# Catch-all target: route all unknown targets to Sphinx using the new
+# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
+%: Makefile
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
