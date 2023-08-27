@@ -19,7 +19,7 @@
 use crate::{error::Error, types, util::MapHelper, AvroResult};
 use digest::Digest;
 use lazy_static::lazy_static;
-use regex::Regex;
+use regex_lite::Regex;
 use serde::{
     ser::{SerializeMap, SerializeSeq},
     Deserialize, Serialize, Serializer,
@@ -42,7 +42,11 @@ lazy_static! {
 
     // An optional namespace (with optional dots) followed by a name without any dots in it.
     static ref SCHEMA_NAME_R: Regex =
-        Regex::new(r"^((?P<namespace>[A-Za-z_][A-Za-z0-9_\.]*)*\.)?(?P<name>[A-Za-z_][A-Za-z0-9_]*)$").unwrap();
+        Regex::new(r"^((?P<namespace>([A-Za-z_][A-Za-z0-9_\.]*)*)\.)?(?P<name>[A-Za-z_][A-Za-z0-9_]*)$").unwrap();
+
+    static ref FIELD_NAME_R: Regex = Regex::new(r"^[A-Za-z_][A-Za-z0-9_]*$").unwrap();
+
+    static ref NAMESPACE_R: Regex = Regex::new(r"^([A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*)?$").unwrap();
 }
 
 /// Represents an Avro schema fingerprint
@@ -225,10 +229,13 @@ impl Name {
     /// `aliases` will not be defined.
     pub fn new(name: &str) -> AvroResult<Self> {
         let (name, namespace) = Name::get_name_and_namespace(name)?;
-        Ok(Self { name, namespace })
+        Ok(Self {
+            name,
+            namespace: namespace.filter(|ns| !ns.is_empty()),
+        })
     }
 
-    pub(crate) fn get_name_and_namespace(name: &str) -> AvroResult<(String, Namespace)> {
+    fn get_name_and_namespace(name: &str) -> AvroResult<(String, Namespace)> {
         let caps = SCHEMA_NAME_R
             .captures(name)
             .ok_or_else(|| Error::InvalidSchemaName(name.to_string(), SCHEMA_NAME_R.as_str()))?;
@@ -253,14 +260,26 @@ impl Name {
             _ => None,
         };
 
-        Ok(Self {
-            name: type_name.unwrap_or(name),
-            namespace: namespace_from_name.or_else(|| {
+        let namespace = namespace_from_name
+            .or_else(|| {
                 complex
                     .string("namespace")
-                    .or(enclosing_namespace.clone())
-                    .filter(|ns| !ns.is_empty())
-            }),
+                    .or_else(|| enclosing_namespace.clone())
+            })
+            .filter(|ns| !ns.is_empty());
+
+        if let Some(ref ns) = namespace {
+            if !NAMESPACE_R.is_match(ns) {
+                return Err(Error::InvalidNamespace(
+                    ns.to_string(),
+                    NAMESPACE_R.as_str(),
+                ));
+            }
+        }
+
+        Ok(Self {
+            name: type_name.unwrap_or(name),
+            namespace,
         })
     }
 
@@ -622,6 +641,10 @@ impl RecordField {
     ) -> AvroResult<Self> {
         let name = field.name().ok_or(Error::GetNameFieldFromRecord)?;
 
+        if !FIELD_NAME_R.is_match(&name) {
+            return Err(Error::FieldName(name));
+        }
+
         // TODO: "type" = "<record name>"
         let schema = parser.parse_complex(field, enclosing_namespace)?;
 
@@ -831,9 +854,11 @@ impl UnionSchema {
                 // extend known schemas with just resolved names
                 collected_names.extend(resolved_names);
                 let namespace = &schema.namespace().or_else(|| enclosing_namespace.clone());
+
                 value
-                    .validate_internal(schema, &collected_names, namespace)
-                    .is_none()
+                    .clone()
+                    .resolve_internal(schema, &collected_names, namespace, &None)
+                    .is_ok()
             })
         }
     }
@@ -1412,11 +1437,10 @@ impl Parser {
             }
         }
 
-        let name = Name::parse(complex, enclosing_namespace)?;
-        let aliases = fix_aliases_namespace(complex.aliases(), &name.namespace);
+        let fully_qualified_name = Name::parse(complex, enclosing_namespace)?;
+        let aliases = fix_aliases_namespace(complex.aliases(), &fully_qualified_name.namespace);
 
         let mut lookup = BTreeMap::new();
-        let fully_qualified_name = name.clone();
 
         self.register_resolving_schema(&fully_qualified_name, &aliases);
 
@@ -1435,7 +1459,9 @@ impl Parser {
             })?;
 
         for field in &fields {
-            lookup.insert(field.name.clone(), field.position);
+            if let Some(_old) = lookup.insert(field.name.clone(), field.position) {
+                return Err(Error::FieldNameDuplicate(field.name.clone()));
+            }
 
             if let Some(ref field_aliases) = field.aliases {
                 for alias in field_aliases {
@@ -5023,6 +5049,415 @@ mod tests {
         let schema = Schema::parse_str(schema_str)?;
         let canonical_form = schema.canonical_form();
         assert_eq!(canonical_form, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3820_deny_invalid_field_names() -> TestResult {
+        let schema_str = r#"
+        {
+          "name": "my_record",
+          "type": "record",
+          "fields": [
+            {
+              "name": "f1.x",
+              "type": {
+                "name": "my_enum",
+                "type": "enum",
+                "symbols": ["a"]
+              }
+            },  {
+              "name": "f2",
+              "type": {
+                "name": "my_fixed",
+                "type": "fixed",
+                "size": 1
+              }
+            }
+          ]
+        }
+        "#;
+
+        match Schema::parse_str(schema_str) {
+            Err(Error::FieldName(x)) if x == "f1.x" => Ok(()),
+            other => Err(format!("Expected Error::FieldName, got {other:?}").into()),
+        }
+    }
+
+    #[test]
+    fn test_avro_3827_disallow_duplicate_field_names() -> TestResult {
+        let schema_str = r#"
+        {
+          "name": "my_schema",
+          "type": "record",
+          "fields": [
+            {
+              "name": "f1",
+              "type": {
+                "name": "a",
+                "type": "record",
+                "fields": []
+              }
+            },  {
+              "name": "f1",
+              "type": {
+                "name": "b",
+                "type": "record",
+                "fields": []
+              }
+            }
+          ]
+        }
+        "#;
+
+        match Schema::parse_str(schema_str) {
+            Err(Error::FieldNameDuplicate(_)) => (),
+            other => {
+                return Err(format!("Expected Error::FieldNameDuplicate, got {other:?}").into())
+            }
+        };
+
+        let schema_str = r#"
+        {
+          "name": "my_schema",
+          "type": "record",
+          "fields": [
+            {
+              "name": "f1",
+              "type": {
+                "name": "a",
+                "type": "record",
+                "fields": [
+                  {
+                    "name": "f1",
+                    "type": {
+                      "name": "b",
+                      "type": "record",
+                      "fields": []
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+        "#;
+
+        let expected = r#"{"name":"my_schema","type":"record","fields":[{"name":"f1","type":{"name":"a","type":"record","fields":[{"name":"f1","type":{"name":"b","type":"record","fields":[]}}]}}]}"#;
+        let schema = Schema::parse_str(schema_str)?;
+        let canonical_form = schema.canonical_form();
+        assert_eq!(canonical_form, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3830_null_namespace_in_fully_qualified_names() -> TestResult {
+        // Check whether all the named types don't refer to the namespace field
+        // if their name starts with a dot.
+        let schema_str = r#"
+        {
+          "name": ".record1",
+          "namespace": "ns1",
+          "type": "record",
+          "fields": [
+            {
+              "name": "f1",
+              "type": {
+                "name": ".enum1",
+                "namespace": "ns2",
+                "type": "enum",
+                "symbols": ["a"]
+              }
+            },  {
+              "name": "f2",
+              "type": {
+                "name": ".fxed1",
+                "namespace": "ns3",
+                "type": "fixed",
+                "size": 1
+              }
+            }
+          ]
+        }
+        "#;
+
+        let expected = r#"{"name":"record1","type":"record","fields":[{"name":"f1","type":{"name":"enum1","type":"enum","symbols":["a"]}},{"name":"f2","type":{"name":"fxed1","type":"fixed","size":1}}]}"#;
+        let schema = Schema::parse_str(schema_str)?;
+        let canonical_form = schema.canonical_form();
+        assert_eq!(canonical_form, expected);
+
+        // Check whether inner types don't inherit ns1.
+        let schema_str = r#"
+        {
+          "name": ".record1",
+          "namespace": "ns1",
+          "type": "record",
+          "fields": [
+            {
+              "name": "f1",
+              "type": {
+                "name": "enum1",
+                "type": "enum",
+                "symbols": ["a"]
+              }
+            },  {
+              "name": "f2",
+              "type": {
+                "name": "fxed1",
+                "type": "fixed",
+                "size": 1
+              }
+            }
+          ]
+        }
+        "#;
+
+        let expected = r#"{"name":"record1","type":"record","fields":[{"name":"f1","type":{"name":"enum1","type":"enum","symbols":["a"]}},{"name":"f2","type":{"name":"fxed1","type":"fixed","size":1}}]}"#;
+        let schema = Schema::parse_str(schema_str)?;
+        let canonical_form = schema.canonical_form();
+        assert_eq!(canonical_form, expected);
+
+        let name = Name::new(".my_name")?;
+        let fullname = name.fullname(None);
+        assert_eq!(fullname, "my_name");
+        let qname = name.fully_qualified_name(&None).to_string();
+        assert_eq!(qname, "my_name");
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3814_schema_resolution_failure() -> TestResult {
+        // Define a reader schema: a nested record with an optional field.
+        let reader_schema = json!(
+            {
+                "type": "record",
+                "name": "MyOuterRecord",
+                "fields": [
+                    {
+                        "name": "inner_record",
+                        "type": [
+                            "null",
+                            {
+                                "type": "record",
+                                "name": "MyRecord",
+                                "fields": [
+                                    {"name": "a", "type": "string"}
+                                ]
+                            }
+                        ],
+                        "default": null
+                    }
+                ]
+            }
+        );
+
+        // Define a writer schema: a nested record with an optional field, which
+        // may optionally contain an enum.
+        let writer_schema = json!(
+            {
+                "type": "record",
+                "name": "MyOuterRecord",
+                "fields": [
+                    {
+                        "name": "inner_record",
+                        "type": [
+                            "null",
+                            {
+                                "type": "record",
+                                "name": "MyRecord",
+                                "fields": [
+                                    {"name": "a", "type": "string"},
+                                    {
+                                        "name": "b",
+                                        "type": [
+                                            "null",
+                                            {
+                                                "type": "enum",
+                                                "name": "MyEnum",
+                                                "symbols": ["A", "B", "C"],
+                                                "default": "C"
+                                            }
+                                        ],
+                                        "default": null
+                                    },
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "default": null
+            }
+        );
+
+        // Use different structs to represent the "Reader" and the "Writer"
+        // to mimic two different versions of a producer & consumer application.
+        #[derive(Serialize, Deserialize, Debug)]
+        struct MyInnerRecordReader {
+            a: String,
+        }
+
+        #[derive(Serialize, Deserialize, Debug)]
+        struct MyRecordReader {
+            inner_record: Option<MyInnerRecordReader>,
+        }
+
+        #[derive(Serialize, Deserialize, Debug)]
+        enum MyEnum {
+            A,
+            B,
+            C,
+        }
+
+        #[derive(Serialize, Deserialize, Debug)]
+        struct MyInnerRecordWriter {
+            a: String,
+            b: Option<MyEnum>,
+        }
+
+        #[derive(Serialize, Deserialize, Debug)]
+        struct MyRecordWriter {
+            inner_record: Option<MyInnerRecordWriter>,
+        }
+
+        let s = MyRecordWriter {
+            inner_record: Some(MyInnerRecordWriter {
+                a: "foo".to_string(),
+                b: None,
+            }),
+        };
+
+        // Serialize using the writer schema.
+        let writer_schema = Schema::parse(&writer_schema)?;
+        let avro_value = crate::to_value(s)?;
+        assert!(
+            avro_value.validate(&writer_schema),
+            "value is valid for schema",
+        );
+        let datum = crate::to_avro_datum(&writer_schema, avro_value)?;
+
+        // Now, attempt to deserialize using the reader schema.
+        let reader_schema = Schema::parse(&reader_schema)?;
+        let mut x = &datum[..];
+
+        // Deserialization should succeed and we should be able to resolve the schema.
+        let deser_value = crate::from_avro_datum(&writer_schema, &mut x, Some(&reader_schema))?;
+        assert!(deser_value.validate(&reader_schema));
+
+        // Verify that we can read a field from the record.
+        let d: MyRecordReader = crate::from_value(&deser_value)?;
+        assert_eq!(d.inner_record.unwrap().a, "foo".to_string());
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3837_disallow_invalid_namespace() -> TestResult {
+        // Valid namespace #1 (Single name portion)
+        let schema_str = r#"
+        {
+          "name": "record1",
+          "namespace": "ns1",
+          "type": "record",
+          "fields": []
+        }
+        "#;
+
+        let expected = r#"{"name":"ns1.record1","type":"record","fields":[]}"#;
+        let schema = Schema::parse_str(schema_str)?;
+        let canonical_form = schema.canonical_form();
+        assert_eq!(canonical_form, expected);
+
+        // Valid namespace #2 (multiple name portions).
+        let schema_str = r#"
+        {
+          "name": "enum1",
+          "namespace": "ns1.foo.bar",
+          "type": "enum",
+          "symbols": ["a"]
+        }
+        "#;
+
+        let expected = r#"{"name":"ns1.foo.bar.enum1","type":"enum","symbols":["a"]}"#;
+        let schema = Schema::parse_str(schema_str)?;
+        let canonical_form = schema.canonical_form();
+        assert_eq!(canonical_form, expected);
+
+        // Invalid namespace #1 (a name portion starts with dot)
+        let schema_str = r#"
+        {
+          "name": "fixed1",
+          "namespace": ".ns1.a.b",
+          "type": "fixed",
+          "size": 1
+        }
+        "#;
+
+        match Schema::parse_str(schema_str) {
+            Err(Error::InvalidNamespace(_, _)) => (),
+            other => return Err(format!("Expected Error::InvalidNamespace, got {other:?}").into()),
+        };
+
+        // Invalid namespace #2 (invalid character in a name portion)
+        let schema_str = r#"
+        {
+          "name": "record1",
+          "namespace": "ns1.a*b.c",
+          "type": "record",
+          "fields": []
+        }
+        "#;
+
+        match Schema::parse_str(schema_str) {
+            Err(Error::InvalidNamespace(_, _)) => (),
+            other => return Err(format!("Expected Error::InvalidNamespace, got {other:?}").into()),
+        };
+
+        // Invalid namespace #3 (a name portion starts with a digit)
+        let schema_str = r#"
+        {
+          "name": "fixed1",
+          "namespace": "ns1.1a.b",
+          "type": "fixed",
+          "size": 1
+        }
+        "#;
+
+        match Schema::parse_str(schema_str) {
+            Err(Error::InvalidNamespace(_, _)) => (),
+            other => return Err(format!("Expected Error::InvalidNamespace, got {other:?}").into()),
+        };
+
+        // Invalid namespace #4 (a name portion is missing - two dots in a row)
+        let schema_str = r#"
+        {
+          "name": "fixed1",
+          "namespace": "ns1..a",
+          "type": "fixed",
+          "size": 1
+        }
+        "#;
+
+        match Schema::parse_str(schema_str) {
+            Err(Error::InvalidNamespace(_, _)) => (),
+            other => return Err(format!("Expected Error::InvalidNamespace, got {other:?}").into()),
+        };
+
+        // Invalid namespace #5 (a name portion is missing - ends with a dot)
+        let schema_str = r#"
+        {
+          "name": "fixed1",
+          "namespace": "ns1.a.",
+          "type": "fixed",
+          "size": 1
+        }
+        "#;
+
+        match Schema::parse_str(schema_str) {
+            Err(Error::InvalidNamespace(_, _)) => (),
+            other => return Err(format!("Expected Error::InvalidNamespace, got {other:?}").into()),
+        };
 
         Ok(())
     }
