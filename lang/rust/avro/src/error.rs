@@ -19,9 +19,9 @@ use crate::{
     schema::{Name, SchemaKind},
     types::ValueKind,
 };
-use std::fmt;
+use std::{error::Error as _, fmt};
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error)]
 pub enum Error {
     #[error("Bad Snappy CRC32; expected {expected:x} but got {actual:x}")]
     SnappyCrc32 { expected: u32, actual: u32 },
@@ -307,8 +307,17 @@ pub enum Error {
     #[error("Invalid enum symbol name {0}")]
     EnumSymbolName(String),
 
+    #[error("Invalid field name {0}")]
+    FieldName(String),
+
+    #[error("Duplicate field name {0}")]
+    FieldNameDuplicate(String),
+
     #[error("Invalid schema name {0}. It must match the regex '{1}'")]
     InvalidSchemaName(String, &'static str),
+
+    #[error("Invalid namespace {0}. It must match the regex '{1}'")]
+    InvalidNamespace(String, &'static str),
 
     #[error("Duplicate enum symbol {0}")]
     EnumSymbolDuplicate(String),
@@ -459,5 +468,15 @@ impl serde::ser::Error for Error {
 impl serde::de::Error for Error {
     fn custom<T: fmt::Display>(msg: T) -> Self {
         Error::DeserializeValue(msg.to_string())
+    }
+}
+
+impl fmt::Debug for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut msg = self.to_string();
+        if let Some(e) = self.source() {
+            msg.extend([": ", &e.to_string()]);
+        }
+        write!(f, "{}", msg)
     }
 }
