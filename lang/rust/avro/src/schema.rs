@@ -127,6 +127,10 @@ pub enum Schema {
     TimestampMillis,
     /// An instant in time represented as the number of microseconds after the UNIX epoch.
     TimestampMicros,
+    /// An instant in localtime represented as the number of milliseconds after the UNIX epoch.
+    LocalTimestampMillis,
+    /// An instant in local time represented as the number of microseconds after the UNIX epoch.
+    LocalTimestampMicros,
     /// An amount of time defined by a number of months, days and milliseconds.
     Duration,
     /// A reference to another schema.
@@ -191,6 +195,8 @@ impl From<&types::Value> for SchemaKind {
             Value::TimeMicros(_) => Self::TimeMicros,
             Value::TimestampMillis(_) => Self::TimestampMillis,
             Value::TimestampMicros(_) => Self::TimestampMicros,
+            Value::LocalTimestampMillis(_) => Self::LocalTimestampMillis,
+            Value::LocalTimestampMicros(_) => Self::LocalTimestampMicros,
             Value::Duration { .. } => Self::Duration,
         }
     }
@@ -637,7 +643,7 @@ impl RecordField {
         field: &Map<String, Value>,
         position: usize,
         parser: &mut Parser,
-        enclosing_namespace: &Namespace,
+        enclosing_record: &Name,
     ) -> AvroResult<Self> {
         let name = field.name().ok_or(Error::GetNameFieldFromRecord)?;
 
@@ -646,9 +652,16 @@ impl RecordField {
         }
 
         // TODO: "type" = "<record name>"
-        let schema = parser.parse_complex(field, enclosing_namespace)?;
+        let schema = parser.parse_complex(field, &enclosing_record.namespace)?;
 
         let default = field.get("default").cloned();
+        Self::resolve_default_value(
+            &schema,
+            &name,
+            &enclosing_record.fullname(None),
+            &parser.parsed_schemas,
+            &default,
+        )?;
 
         let aliases = field.get("aliases").and_then(|aliases| {
             aliases.as_array().map(|aliases| {
@@ -676,6 +689,55 @@ impl RecordField {
             position,
             custom_attributes: RecordField::get_field_custom_attributes(field),
         })
+    }
+
+    fn resolve_default_value(
+        field_schema: &Schema,
+        field_name: &str,
+        record_name: &str,
+        names: &Names,
+        default: &Option<Value>,
+    ) -> AvroResult<()> {
+        if let Some(value) = default {
+            let avro_value = types::Value::from(value.clone());
+            match field_schema {
+                Schema::Union(union_schema) => {
+                    let schemas = &union_schema.schemas;
+                    let resolved = schemas.iter().any(|schema| {
+                        avro_value
+                            .to_owned()
+                            .resolve_internal(schema, names, &schema.namespace(), &None)
+                            .is_ok()
+                    });
+
+                    if !resolved {
+                        let schema: Option<&Schema> = schemas.get(0);
+                        return match schema {
+                            Some(first_schema) => Err(Error::GetDefaultUnion(
+                                SchemaKind::from(first_schema),
+                                types::ValueKind::from(avro_value),
+                            )),
+                            None => Err(Error::EmptyUnion),
+                        };
+                    }
+                }
+                _ => {
+                    let resolved = avro_value
+                        .resolve_internal(field_schema, names, &field_schema.namespace(), &None)
+                        .is_ok();
+
+                    if !resolved {
+                        return Err(Error::GetDefaultRecordField(
+                            field_name.to_string(),
+                            record_name.to_string(),
+                            field_schema.canonical_form(),
+                        ));
+                    }
+                }
+            };
+        }
+
+        Ok(())
     }
 
     fn get_field_custom_attributes(field: &Map<String, Value>) -> BTreeMap<String, Value> {
@@ -1066,7 +1128,7 @@ impl Parser {
         match *value {
             Value::String(ref t) => self.parse_known_schema(t.as_str(), enclosing_namespace),
             Value::Object(ref data) => self.parse_complex(data, enclosing_namespace),
-            Value::Array(ref data) => self.parse_union(data, enclosing_namespace, None),
+            Value::Array(ref data) => self.parse_union(data, enclosing_namespace),
             _ => Err(Error::ParseSchemaFromValidJson),
         }
     }
@@ -1331,6 +1393,26 @@ impl Parser {
                         enclosing_namespace,
                     );
                 }
+                "local-timestamp-millis" => {
+                    return try_logical_type(
+                        "local-timestamp-millis",
+                        complex,
+                        &[SchemaKind::Long],
+                        Schema::LocalTimestampMillis,
+                        self,
+                        enclosing_namespace,
+                    );
+                }
+                "local-timestamp-micros" => {
+                    return try_logical_type(
+                        "local-timestamp-micros",
+                        complex,
+                        &[SchemaKind::Long],
+                        Schema::LocalTimestampMicros,
+                        self,
+                        enclosing_namespace,
+                    );
+                }
                 "duration" => {
                     logical_verify_type(complex, &[SchemaKind::Fixed], self, enclosing_namespace)?;
                     return Ok(Schema::Duration);
@@ -1355,10 +1437,7 @@ impl Parser {
                 other => self.parse_known_schema(other, enclosing_namespace),
             },
             Some(Value::Object(data)) => self.parse_complex(data, enclosing_namespace),
-            Some(Value::Array(variants)) => {
-                let default = complex.get("default");
-                self.parse_union(variants, enclosing_namespace, default)
-            }
+            Some(Value::Array(variants)) => self.parse_union(variants, enclosing_namespace),
             Some(unknown) => Err(Error::GetComplexType(unknown.clone())),
             None => Err(Error::GetComplexTypeField),
         }
@@ -1453,7 +1532,7 @@ impl Parser {
                     .filter_map(|field| field.as_object())
                     .enumerate()
                     .map(|(position, field)| {
-                        RecordField::parse(field, position, self, &fully_qualified_name.namespace)
+                        RecordField::parse(field, position, self, &fully_qualified_name)
                     })
                     .collect::<Result<_, _>>()
             })?;
@@ -1553,6 +1632,18 @@ impl Parser {
             }
         }
 
+        if let Some(ref value) = default {
+            let resolved = types::Value::from(value.clone())
+                .resolve_enum(&symbols, &Some(value.to_string()), &None)
+                .is_ok();
+            if !resolved {
+                return Err(Error::GetEnumDefault {
+                    symbol: value.to_string(),
+                    symbols,
+                });
+            }
+        }
+
         let schema = Schema::Enum(EnumSchema {
             name: fully_qualified_name.clone(),
             aliases: aliases.clone(),
@@ -1601,40 +1692,11 @@ impl Parser {
         &mut self,
         items: &[Value],
         enclosing_namespace: &Namespace,
-        default: Option<&Value>,
     ) -> AvroResult<Schema> {
         items
             .iter()
             .map(|v| self.parse(v, enclosing_namespace))
             .collect::<Result<Vec<_>, _>>()
-            .and_then(|schemas| {
-                if let Some(default_value) = default.cloned() {
-                    let avro_value = types::Value::from(default_value);
-                    let resolved = schemas.iter().any(|schema| {
-                        avro_value
-                            .to_owned()
-                            .resolve_internal(
-                                schema,
-                                &self.parsed_schemas,
-                                &schema.namespace(),
-                                &None,
-                            )
-                            .is_ok()
-                    });
-
-                    if !resolved {
-                        let schema: Option<&Schema> = schemas.get(0);
-                        return match schema {
-                            Some(first_schema) => Err(Error::GetDefaultUnion(
-                                SchemaKind::from(first_schema),
-                                types::ValueKind::from(avro_value),
-                            )),
-                            None => Err(Error::EmptyUnion),
-                        };
-                    }
-                }
-                Ok(schemas)
-            })
             .and_then(|schemas| Ok(Schema::Union(UnionSchema::new(schemas)?)))
     }
 
@@ -1861,6 +1923,18 @@ impl Serialize for Schema {
                 let mut map = serializer.serialize_map(None)?;
                 map.serialize_entry("type", "long")?;
                 map.serialize_entry("logicalType", "timestamp-micros")?;
+                map.end()
+            }
+            Schema::LocalTimestampMillis => {
+                let mut map = serializer.serialize_map(None)?;
+                map.serialize_entry("type", "long")?;
+                map.serialize_entry("logicalType", "local-timestamp-millis")?;
+                map.end()
+            }
+            Schema::LocalTimestampMicros => {
+                let mut map = serializer.serialize_map(None)?;
+                map.serialize_entry("type", "long")?;
+                map.serialize_entry("logicalType", "local-timestamp-micros")?;
                 map.end()
             }
             Schema::Duration => {
@@ -5466,6 +5540,314 @@ mod tests {
             Err(Error::InvalidNamespace(_, _)) => (),
             other => return Err(format!("Expected Error::InvalidNamespace, got {other:?}").into()),
         };
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3851_validate_default_value_of_simple_record_field() -> TestResult {
+        let schema_str = r#"
+        {
+            "name": "record1",
+            "namespace": "ns",
+            "type": "record",
+            "fields": [
+                {
+                    "name": "f1",
+                    "type": "int",
+                    "default": "invalid"
+                }
+            ]
+        }
+        "#;
+        let expected = Error::GetDefaultRecordField(
+            "f1".to_string(),
+            "ns.record1".to_string(),
+            r#""int""#.to_string(),
+        )
+        .to_string();
+        let result = Schema::parse_str(schema_str);
+        assert!(result.is_err());
+        let err = result
+            .map_err(|e| e.to_string())
+            .err()
+            .unwrap_or_else(|| "unexpected".to_string());
+        assert_eq!(expected, err);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3851_validate_default_value_of_nested_record_field() -> TestResult {
+        let schema_str = r#"
+        {
+            "name": "record1",
+            "namespace": "ns",
+            "type": "record",
+            "fields": [
+                {
+                    "name": "f1",
+                    "type": {
+                        "name": "record2",
+                        "type": "record",
+                        "fields": [
+                            {
+                                "name": "f1_1",
+                                "type": "int"
+                            }
+                        ]
+                    },
+                    "default": "invalid"
+                }
+            ]
+        }
+        "#;
+        let expected = Error::GetDefaultRecordField(
+            "f1".to_string(),
+            "ns.record1".to_string(),
+            r#"{"name":"ns.record2","type":"record","fields":[{"name":"f1_1","type":"int"}]}"#
+                .to_string(),
+        )
+        .to_string();
+        let result = Schema::parse_str(schema_str);
+        assert!(result.is_err());
+        let err = result
+            .map_err(|e| e.to_string())
+            .err()
+            .unwrap_or_else(|| "unexpected".to_string());
+        assert_eq!(expected, err);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3851_validate_default_value_of_enum_record_field() -> TestResult {
+        let schema_str = r#"
+        {
+            "name": "record1",
+            "namespace": "ns",
+            "type": "record",
+            "fields": [
+                {
+                    "name": "f1",
+                    "type": {
+                        "name": "enum1",
+                        "type": "enum",
+                        "symbols": ["a", "b", "c"]
+                    },
+                    "default": "invalid"
+                }
+            ]
+        }
+        "#;
+        let expected = Error::GetDefaultRecordField(
+            "f1".to_string(),
+            "ns.record1".to_string(),
+            r#"{"name":"ns.enum1","type":"enum","symbols":["a","b","c"]}"#.to_string(),
+        )
+        .to_string();
+        let result = Schema::parse_str(schema_str);
+        assert!(result.is_err());
+        let err = result
+            .map_err(|e| e.to_string())
+            .err()
+            .unwrap_or_else(|| "unexpected".to_string());
+        assert_eq!(expected, err);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3851_validate_default_value_of_fixed_record_field() -> TestResult {
+        let schema_str = r#"
+        {
+            "name": "record1",
+            "namespace": "ns",
+            "type": "record",
+            "fields": [
+                {
+                    "name": "f1",
+                    "type": {
+                        "name": "fixed1",
+                        "type": "fixed",
+                        "size": 3
+                    },
+                    "default": 100
+                }
+            ]
+        }
+        "#;
+        let expected = Error::GetDefaultRecordField(
+            "f1".to_string(),
+            "ns.record1".to_string(),
+            r#"{"name":"ns.fixed1","type":"fixed","size":3}"#.to_string(),
+        )
+        .to_string();
+        let result = Schema::parse_str(schema_str);
+        assert!(result.is_err());
+        let err = result
+            .map_err(|e| e.to_string())
+            .err()
+            .unwrap_or_else(|| "unexpected".to_string());
+        assert_eq!(expected, err);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3851_validate_default_value_of_array_record_field() -> TestResult {
+        let schema_str = r#"
+        {
+            "name": "record1",
+            "namespace": "ns",
+            "type": "record",
+            "fields": [
+                {
+                    "name": "f1",
+                    "type": "array",
+                    "items": "int",
+                    "default": "invalid"
+                }
+            ]
+        }
+        "#;
+        let expected = Error::GetDefaultRecordField(
+            "f1".to_string(),
+            "ns.record1".to_string(),
+            r#"{"type":"array","items":"int"}"#.to_string(),
+        )
+        .to_string();
+        let result = Schema::parse_str(schema_str);
+        assert!(result.is_err());
+        let err = result
+            .map_err(|e| e.to_string())
+            .err()
+            .unwrap_or_else(|| "unexpected".to_string());
+        assert_eq!(expected, err);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3851_validate_default_value_of_map_record_field() -> TestResult {
+        let schema_str = r#"
+        {
+            "name": "record1",
+            "namespace": "ns",
+            "type": "record",
+            "fields": [
+                {
+                    "name": "f1",
+                    "type": "map",
+                    "values": "string",
+                    "default": "invalid"
+                }
+            ]
+        }
+        "#;
+        let expected = Error::GetDefaultRecordField(
+            "f1".to_string(),
+            "ns.record1".to_string(),
+            r#"{"type":"map","values":"string"}"#.to_string(),
+        )
+        .to_string();
+        let result = Schema::parse_str(schema_str);
+        assert!(result.is_err());
+        let err = result
+            .map_err(|e| e.to_string())
+            .err()
+            .unwrap_or_else(|| "unexpected".to_string());
+        assert_eq!(expected, err);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3851_validate_default_value_of_ref_record_field() -> TestResult {
+        let schema_str = r#"
+        {
+            "name": "record1",
+            "namespace": "ns",
+            "type": "record",
+            "fields": [
+                {
+                    "name": "f1",
+                    "type": {
+                        "name": "record2",
+                        "type": "record",
+                        "fields": [
+                            {
+                                "name": "f1_1",
+                                "type": "int"
+                            }
+                        ]
+                    }
+                },  {
+                    "name": "f2",
+                    "type": "ns.record2",
+                    "default": { "f1_1": true }
+                }
+            ]
+        }
+        "#;
+        let expected = Error::GetDefaultRecordField(
+            "f2".to_string(),
+            "ns.record1".to_string(),
+            r#""ns.record2""#.to_string(),
+        )
+        .to_string();
+        let result = Schema::parse_str(schema_str);
+        assert!(result.is_err());
+        let err = result
+            .map_err(|e| e.to_string())
+            .err()
+            .unwrap_or_else(|| "unexpected".to_string());
+        assert_eq!(expected, err);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_avro_3851_validate_default_value_of_enum() -> TestResult {
+        let schema_str = r#"
+        {
+            "name": "enum1",
+            "namespace": "ns",
+            "type": "enum",
+            "symbols": ["a", "b", "c"],
+            "default": 100
+        }
+        "#;
+        let expected = Error::EnumDefaultWrongType(100.into()).to_string();
+        let result = Schema::parse_str(schema_str);
+        assert!(result.is_err());
+        let err = result
+            .map_err(|e| e.to_string())
+            .err()
+            .unwrap_or_else(|| "unexpected".to_string());
+        assert_eq!(expected, err);
+
+        let schema_str = r#"
+        {
+            "name": "enum1",
+            "namespace": "ns",
+            "type": "enum",
+            "symbols": ["a", "b", "c"],
+            "default": "d"
+        }
+        "#;
+        let expected = Error::GetEnumDefault {
+            symbol: "d".to_string(),
+            symbols: vec!["a".to_string(), "b".to_string(), "c".to_string()],
+        }
+        .to_string();
+        let result = Schema::parse_str(schema_str);
+        assert!(result.is_err());
+        let err = result
+            .map_err(|e| e.to_string())
+            .err()
+            .unwrap_or_else(|| "unexpected".to_string());
+        assert_eq!(expected, err);
 
         Ok(())
     }
