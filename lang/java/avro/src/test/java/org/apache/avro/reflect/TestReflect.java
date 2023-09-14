@@ -977,7 +977,8 @@ public class TestReflect {
   void forwardReference() {
     ReflectData data = ReflectData.get();
     Protocol reflected = data.getProtocol(C.class);
-    Protocol reparsed = Protocol.parse(reflected.toString());
+    String ref = reflected.toString();
+    Protocol reparsed = Protocol.parse(ref);
     assertEquals(reflected, reparsed);
     assert (reparsed.getTypes().contains(data.getSchema(A.class)));
     assert (reparsed.getTypes().contains(data.getSchema(B1.class)));
@@ -1231,7 +1232,7 @@ public class TestReflect {
   @Test
   void dollarTerminatedNamespaceCompatibility() {
     ReflectData data = ReflectData.get();
-    Schema s = new Schema.Parser().setValidate(false).parse(
+    Schema s = new Schema.Parser(Schema.NameValidator.NO_VALIDATION).parse(
         "{\"type\":\"record\",\"name\":\"Z\",\"namespace\":\"org.apache.avro.reflect.TestReflect$\",\"fields\":[]}");
     assertEquals(data.getSchema(data.getClass(s)).toString(),
         "{\"type\":\"record\",\"name\":\"Z\",\"namespace\":\"org.apache.avro.reflect.TestReflect\",\"fields\":[]}");
@@ -1241,7 +1242,7 @@ public class TestReflect {
   void dollarTerminatedNestedStaticClassNamespaceCompatibility() {
     ReflectData data = ReflectData.get();
     // Older versions of Avro generated this namespace on nested records.
-    Schema s = new Schema.Parser().setValidate(false).parse(
+    Schema s = new Schema.Parser(Schema.NameValidator.NO_VALIDATION).parse(
         "{\"type\":\"record\",\"name\":\"AnotherSampleRecord\",\"namespace\":\"org.apache.avro.reflect.TestReflect$SampleRecord\",\"fields\":[]}");
     assertThat(data.getSchema(data.getClass(s)).getFullName(),
         is("org.apache.avro.reflect.TestReflect.SampleRecord.AnotherSampleRecord"));

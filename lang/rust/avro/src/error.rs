@@ -151,6 +151,12 @@ pub enum Error {
     #[error("TimestampMicros expected, got {0:?}")]
     GetTimestampMicros(ValueKind),
 
+    #[error("LocalTimestampMillis expected, got {0:?}")]
+    GetLocalTimestampMillis(ValueKind),
+
+    #[error("LocalTimestampMicros expected, got {0:?}")]
+    GetLocalTimestampMicros(ValueKind),
+
     #[error("Null expected, got {0:?}")]
     GetNull(ValueKind),
 
@@ -234,6 +240,9 @@ pub enum Error {
 
     #[error("One union type {0:?} must match the `default`'s value type {1:?}")]
     GetDefaultUnion(SchemaKind, ValueKind),
+
+    #[error("`default`'s value type of field {0:?} in {1:?} must be {2:?}")]
+    GetDefaultRecordField(String, String, String),
 
     #[error("JSON value {0} claims to be u64 but cannot be converted")]
     GetU64FromJson(serde_json::Number),
