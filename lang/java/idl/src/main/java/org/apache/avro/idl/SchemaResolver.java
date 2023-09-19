@@ -22,7 +22,10 @@ import org.apache.avro.Protocol;
 import org.apache.avro.Schema;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,6 +44,8 @@ final class SchemaResolver {
 
   private static final String UR_SCHEMA_NS = "org.apache.avro.compiler";
 
+  private static final AtomicInteger COUNTER = new AtomicInteger();
+
   /**
    * Create a schema to represent an "unresolved" schema. (used to represent a
    * schema whose definition does not exist, yet).
@@ -49,8 +54,8 @@ final class SchemaResolver {
    * @return an unresolved schema for the given name
    */
   static Schema unresolvedSchema(final String name) {
-    Schema schema = Schema.createRecord(UR_SCHEMA_NAME, "unresolved schema", UR_SCHEMA_NS, false,
-        Collections.emptyList());
+    Schema schema = Schema.createRecord(UR_SCHEMA_NAME + '_' + COUNTER.getAndIncrement(), "unresolved schema",
+        UR_SCHEMA_NS, false, Collections.emptyList());
     schema.addProp(UR_SCHEMA_ATTR, name);
     return schema;
   }
@@ -62,8 +67,8 @@ final class SchemaResolver {
    * @return whether the schema is an unresolved schema
    */
   static boolean isUnresolvedSchema(final Schema schema) {
-    return (schema.getType() == Schema.Type.RECORD && schema.getProp(UR_SCHEMA_ATTR) != null
-        && UR_SCHEMA_NAME.equals(schema.getName()) && UR_SCHEMA_NS.equals(schema.getNamespace()));
+    return (schema.getType() == Schema.Type.RECORD && schema.getProp(UR_SCHEMA_ATTR) != null && schema.getName() != null
+        && schema.getName().startsWith(UR_SCHEMA_NAME) && UR_SCHEMA_NS.equals(schema.getNamespace()));
   }
 
   /**
@@ -97,7 +102,16 @@ final class SchemaResolver {
    * @return a copy of idlFile with all schemas resolved
    */
   static IdlFile resolve(final IdlFile idlFile, String... schemaPropertiesToRemove) {
-    return new IdlFile(resolve(idlFile.getProtocol(), schemaPropertiesToRemove), idlFile.getWarnings());
+    if (idlFile.getProtocol() != null) {
+      return new IdlFile(resolve(idlFile.getProtocol(), schemaPropertiesToRemove), idlFile.getWarnings());
+    }
+
+    ResolvingVisitor visitor = new ResolvingVisitor(null, idlFile::getNamedSchema, schemaPropertiesToRemove);
+    Function<Schema, Schema> resolver = schema -> Schemas.visit(schema, visitor.withRoot(schema));
+
+    List<Schema> namedSchemata = idlFile.getNamedSchemas().values().stream().map(resolver).collect(Collectors.toList());
+    Schema mainSchema = Optional.ofNullable(idlFile.getMainSchema()).map(resolver).orElse(null);
+    return new IdlFile(idlFile.getNamespace(), mainSchema, namedSchemata, idlFile.getWarnings());
   }
 
   /**
